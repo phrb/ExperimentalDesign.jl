@@ -469,7 +469,7 @@ function generate_designs(factors::DataStructures.OrderedDict,
                           sample_range::UnitRange{Int},
                           designs::Int;
                           check_bounds::Bool = true,
-                          scale::Function = scale_orthogonal!,
+                          scale::Function = scale_boxdraper_encoding!,
                           compute_all_metrics::Bool = false)
     println("> Factors: ", factors)
 
@@ -570,7 +570,7 @@ function sample_subset(factors::DataStructures.OrderedDict,
                        sample_range::UnitRange{Int},
                        designs::Int;
                        check_bounds::Bool = true,
-                       scale::Function = scale_orthogonal!)
+                       scale::Function = scale_boxdraper_encoding!)
     formula = build_linear_formula(collect(keys(factors)))
     #formula = @formula(y ~ x1 + x2 + x3)
 
@@ -591,7 +591,7 @@ function sample_subsets(factors::Array{OrderedDict{Symbol, Array{Float64, 1}}, 1
                         ranges::Array{UnitRange{Int}, 1},
                         designs::Int;
                         check_bounds::Bool = true,
-                        scale::Function = scale_orthogonal!,
+                        scale::Function = scale_boxdraper_encoding!,
                         compute_all_metrics::Bool = false)
     sampled_subsets = []
 
@@ -635,7 +635,7 @@ function plot_subsets(sampled_subsets; columns = [:DELB])
             guidefont  = large_font,
             tickfont   = small_font,
             legendfont = small_font)
-    default(size = (896 * upscale, 504 * upscale))
+    default(size = (700 * upscale, 900 * upscale))
     default(dpi = 300)
 
     plotly()
