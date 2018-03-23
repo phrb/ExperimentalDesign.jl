@@ -1,6 +1,8 @@
 julia 0.6
+Reexport
 IterTools
 DataFrames
+DataStructures
 StatsBase
 StatPlots
 Primes

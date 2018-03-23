@@ -1,7 +1,7 @@
-function build_linear_formula(factors::Int)
+function build_linear_formula(factors::Array{Symbol, 1})
     linear_formula = Expr(:call)
-    linear_formula.args = vcat(:+, [Symbol("x", i) for i = 1:factors])
-    return Formula(:Y, linear_formula)
+    linear_formula.args = vcat(:+, factors)
+    return DataFrames.Formula(:y, linear_formula)
 end
 
 function get_model_variables(formula::DataFrames.Formula)
@@ -21,19 +21,19 @@ limits.
 ```jldoctest
 julia> using ExperimentalDesign
 
-julia> factors = [[-5., 0., 5.], [1., 2., 3.], [-2., -1., 0.]]
-3-element Array{Array{Float64,1},1}:
- [-5.0, 0.0, 5.0]
- [1.0, 2.0, 3.0]
- [-2.0, -1.0, 0.0]
-
 julia> A = [5. 2. -1.; 5. 3. 0.; -5. 1. -2.]
 3×3 Array{Float64,2}:
   5.0  2.0  -1.0
   5.0  3.0   0.0
  -5.0  1.0  -2.0
 
-julia> scale_orthogonal!(A, factors)
+julia> factors = OrderedDict([(:f1, [-5., 0., 5.]), (:f2, [1., 2., 3.]), (:f3, [-2., -1., 0.])])
+DataStructures.OrderedDict{Symbol,Array{Float64,1}} with 3 entries:
+  :f1 => [-5.0, 0.0, 5.0]
+  :f2 => [1.0, 2.0, 3.0]
+  :f3 => [-2.0, -1.0, 0.0]
+
+julia> scale_orthogonal!(A, collect(values(factors)))
 3×3 Array{Float64,2}:
   1.0   0.0   0.0
   1.0   1.0   1.0
@@ -44,6 +44,7 @@ julia> A
   1.0   0.0   0.0
   1.0   1.0   1.0
  -1.0  -1.0  -1.0
+
 ```
 
 # Formula
@@ -80,85 +81,71 @@ end
 """
     scale_boxdraper_encoding!(design::Array{Float64, 2},
                               factors::Array{T, 1};
-                              scale_denominator = false) where T <: Any
+                              scale_denominator = true) where T <: Any
 
 Scale factors of a design using the Box and Draper's coding convention from
 "Response Surfaces, Mixtures, and Ridge Analyses".
 
 # Examples
 
-Without denominator scaling:
-
-```jldoctest
-julia> using ExperimentalDesign
-
-julia> factors = [[-5., 0., 5.], [1., 2., 3.], [-2., -1., 0.], [2., 3., 4.]]
-4-element Array{Array{Float64,1},1}:
- [-5.0, 0.0, 5.0]
- [1.0, 2.0, 3.0]
- [-2.0, -1.0, 0.0]
- [2.0, 3.0, 4.0]
-
-julia> A = [5. 2. -1. 2.; 5. 3. 0. 4.; -5. 1. -2. 3.; 0. 2. -1. 3.]
-4×4 Array{Float64,2}:
-  5.0  2.0  -1.0  2.0
-  5.0  3.0   0.0  4.0
- -5.0  1.0  -2.0  3.0
-  0.0  2.0  -1.0  3.0
-
-julia> scale_boxdraper_encoding!(A, factors)
-4×4 Array{Float64,2}:
-  0.57735   0.0        0.0       -0.707107
-  0.57735   0.707107   0.707107   0.707107
- -0.57735  -0.707107  -0.707107   0.0
-  0.0       0.0        0.0        0.0
-
-julia> A
-4×4 Array{Float64,2}:
-  0.57735   0.0        0.0       -0.707107
-  0.57735   0.707107   0.707107   0.707107
- -0.57735  -0.707107  -0.707107   0.0
-  0.0       0.0        0.0        0.0
-
-julia> all([isapprox(1.0, sqrt(sum(A[:, i] .^ 2.0))) for i in 1:4])
-true
-```
-
 With denominator scaling:
 
 ```jldoctest
 julia> using ExperimentalDesign
 
-julia> factors = [[-5., 0., 5.], [1., 2., 3.], [-2., -1., 0.], [2., 3., 4.]]
-4-element Array{Array{Float64,1},1}:
- [-5.0, 0.0, 5.0]
- [1.0, 2.0, 3.0]
- [-2.0, -1.0, 0.0]
- [2.0, 3.0, 4.0]
+julia> A = float(plackett_burman(4))
+4×3 Array{Float64,2}:
+  1.0   1.0   1.0
+  1.0  -1.0  -1.0
+ -1.0  -1.0   1.0
+ -1.0   1.0  -1.0
 
-julia> A = [5. 2. -1. 2.; 5. 3. 0. 4.; -5. 1. -2. 3.; 0. 2. -1. 3.]
-4×4 Array{Float64,2}:
-  5.0  2.0  -1.0  2.0
-  5.0  3.0   0.0  4.0
- -5.0  1.0  -2.0  3.0
-  0.0  2.0  -1.0  3.0
+julia> factors = OrderedDict([(:f1, [-1., 1.]), (:f2, [-1., 1.]), (:f3, [-1., 1.])])
+DataStructures.OrderedDict{Symbol,Array{Float64,1}} with 3 entries:
+  :f1 => [-1.0, 1.0]
+  :f2 => [-1.0, 1.0]
+  :f3 => [-1.0, 1.0]
 
-julia> scale_boxdraper_encoding!(A, factors, scale_denominator = true)
-4×4 Array{Float64,2}:
-  1.1547   0.0       0.0      -1.41421
-  1.1547   1.41421   1.41421   1.41421
- -1.1547  -1.41421  -1.41421   0.0
-  0.0      0.0       0.0       0.0
+julia> scale_boxdraper_encoding!(A, collect(values(factors)))
+4×3 Array{Float64,2}:
+  1.0   1.0   1.0
+  1.0  -1.0  -1.0
+ -1.0  -1.0   1.0
+ -1.0   1.0  -1.0
 
-julia> A
-4×4 Array{Float64,2}:
-  1.1547   0.0       0.0      -1.41421
-  1.1547   1.41421   1.41421   1.41421
- -1.1547  -1.41421  -1.41421   0.0
-  0.0      0.0       0.0       0.0
-
-julia> all([isapprox(1.0, sqrt(sum((A[:, i].^2.0) / 4))) for i in 1:4])
+julia> all([isapprox(1.0, sqrt(sum(A[:, i] .^ 2.0) / size(A, 1))) for i = 1:size(A, 2)])
 true
+
+```
+
+Without denominator scaling:
+
+```jldoctest
+julia> using ExperimentalDesign
+
+julia> A = float(plackett_burman(4))
+4×3 Array{Float64,2}:
+  1.0   1.0   1.0
+  1.0  -1.0  -1.0
+ -1.0  -1.0   1.0
+ -1.0   1.0  -1.0
+
+julia> factors = OrderedDict([(:f1, [-1., 1.]), (:f2, [-1., 1.]), (:f3, [-1., 1.])])
+DataStructures.OrderedDict{Symbol,Array{Float64,1}} with 3 entries:
+  :f1 => [-1.0, 1.0]
+  :f2 => [-1.0, 1.0]
+  :f3 => [-1.0, 1.0]
+
+julia> scale_boxdraper_encoding!(A, collect(values(factors)), scale_denominator = false)
+4×3 Array{Float64,2}:
+  0.5   0.5   0.5
+  0.5  -0.5  -0.5
+ -0.5  -0.5   0.5
+ -0.5   0.5  -0.5
+
+julia> all([isapprox(1.0, sqrt(sum(A[:, i] .^ 2.0))) for i = 1:size(A, 2)])
+true
+
 ```
 
 # Formula
@@ -175,18 +162,18 @@ Where ``\\bar{\\mathbf{x}}_i`` is mean of factor definition values in the
 `factors` parameter and:
 
 ```math
-S_{i}^{2} = \\sum\\limits_{j = 1}^{n}{(x_{ij} - \\bar{\\mathbf{x}}_i)^{2}}
+S_{i}^{2} = \\dfrac{1}{n} \\sum\\limits_{j = 1}^{n}{(x_{ij} - \\bar{\\mathbf{x}}_i)^{2}}
 ```
 
-If we pass `scale_denominator = true`, ``S_i`` becomes:
+If we pass `scale_denominator = false`, ``S_i`` becomes:
 
 ```math
-S_{i}^{2} = \\dfrac{1}{n} \\sum\\limits_{j = 1}^{n}{(x_{ij} - \\bar{\\mathbf{x}}_i)^{2}}
+S_{i}^{2} = \\sum\\limits_{j = 1}^{n}{(x_{ij} - \\bar{\\mathbf{x}}_i)^{2}}
 ```
 """
 function scale_boxdraper_encoding!(design::Array{Float64, 2},
                                    factors::Array{T, 1};
-                                   scale_denominator = false) where T <: Any
+                                   scale_denominator = true) where T <: Any
     for i = 1:size(design, 2)
         factor_mean = mean(factors[i])
         denominator = sum((design[:, i] .- factor_mean) .^ 2.0)
@@ -212,8 +199,8 @@ end
 """
     generate_model_matrix(formula::DataFrames.Formula,
                           design::Array{Float64, 2},
-                          factors::Array{T, 1};
-                          scale::Function = scale_orthogonal!) where T <: Any
+                          factors::DataStructures.OrderedDict;
+                          scale::Function = scale_boxdraper_encoding!)
 
 Generate a `DataFrame` with a scaled model matrix for a given formula, design and factors.
 
@@ -222,51 +209,44 @@ Assumes that `formula` is a linear relationship between all the factors in `fact
 # Examples
 
 ```jldoctest
-julia> using ExperimentalDesign, DataFrames
+julia> using ExperimentalDesign
 
-julia> A = [5. 2. -1. 2.; 5. 3. 0. 4.; -5. 1. -2. 3.; 0. 2. -1. 3.]
+julia> A = plackett_burman(4)
+4×3 Array{Int64,2}:
+  1   1   1
+  1  -1  -1
+ -1  -1   1
+ -1   1  -1
+
+julia> factors = OrderedDict([(:f1, [-1., 1.]), (:f2, [-1., 1.]), (:f3, [-1., 1.])])
+DataStructures.OrderedDict{Symbol,Array{Float64,1}} with 3 entries:
+  :f1 => [-1.0, 1.0]
+  :f2 => [-1.0, 1.0]
+  :f3 => [-1.0, 1.0]
+
+julia> m = generate_model_matrix(@formula(y ~ f1 + f2 + f3), float(A), factors)
 4×4 Array{Float64,2}:
-  5.0  2.0  -1.0  2.0
-  5.0  3.0   0.0  4.0
- -5.0  1.0  -2.0  3.0
-  0.0  2.0  -1.0  3.0
-
-julia> factors = [[-5., 0., 5.], [1., 2., 3.], [-2., -1., 0.], [2., 3., 4.]]
-4-element Array{Array{Float64,1},1}:
- [-5.0, 0.0, 5.0]
- [1.0, 2.0, 3.0]
- [-2.0, -1.0, 0.0]
- [2.0, 3.0, 4.0]
-
-julia> M = generate_model_matrix(@formula(y ~ x1 + x2 + x3 + x4), A, factors)
-4×5 DataFrames.DataFrame
-│ Row │ I   │ x1   │ x2   │ x3   │ x4   │
-├─────┼─────┼──────┼──────┼──────┼──────┤
-│ 1   │ 1.0 │ 1.0  │ 0.0  │ 0.0  │ -1.0 │
-│ 2   │ 1.0 │ 1.0  │ 1.0  │ 1.0  │ 1.0  │
-│ 3   │ 1.0 │ -1.0 │ -1.0 │ -1.0 │ 0.0  │
-│ 4   │ 1.0 │ 0.0  │ 0.0  │ 0.0  │ 0.0  │
-
-julia> M = generate_model_matrix(@formula(y ~ x1 + x2 + x3 + x4), A, factors, scale = scale_boxdraper_encoding!)
-4×5 DataFrames.DataFrame
-│ Row │ I   │ x1       │ x2        │ x3       │ x4        │
-├─────┼─────┼──────────┼───────────┼──────────┼───────────┤
-│ 1   │ 1.0 │ 0.57735  │ -0.471405 │ 0.408248 │ -0.648886 │
-│ 2   │ 1.0 │ 0.57735  │ -0.235702 │ 0.816497 │ -0.324443 │
-│ 3   │ 1.0 │ -0.57735 │ -0.707107 │ 0.0      │ -0.486664 │
-│ 4   │ 1.0 │ 0.0      │ -0.471405 │ 0.408248 │ -0.486664 │
+ 1.0   1.0   1.0   1.0
+ 1.0   1.0  -1.0  -1.0
+ 1.0  -1.0  -1.0   1.0
+ 1.0  -1.0   1.0  -1.0
 
 ```
 """
 function generate_model_matrix(formula::DataFrames.Formula,
                                design::Array{Float64, 2},
-                               factors::Array{T, 1};
-                               scale::Function = scale_orthogonal!) where T <: Any
+                               factors::DataStructures.OrderedDict;
+                               scale::Function = scale_boxdraper_encoding!)
     variables  = get_model_variables(formula)
 
     # We are assuming a linear formula, a non-linear formula would mess scaling
-    design     = DataFrame(scale(design, factors))
-    new_design = DataFrame(I = ones(size(design, 1)))
+    design      = hcat(ones(size(design, 1)), design)
+    factors     = OrderedDict(vcat(Pair(:I, [-1., 1.]), [f for f in factors]))
+
+    design      = DataFrame(scale(design, collect(values(factors))))
+    rename!(design, OrderedDict(zip(names(design), keys(factors))))
+
+    new_design  = DataFrame(I = design[:I])
 
     for variable in variables
         if typeof(variable) == Expr && variable.args[1] == :&
@@ -277,11 +257,11 @@ function generate_model_matrix(formula::DataFrames.Formula,
                 new_design[interaction] .*= design[s]
             end
         else
-            new_design[variable] = float(design[variable])
+            new_design[variable] = design[variable]
         end
     end
 
-    return new_design
+    return Array(new_design[collect(keys(factors))])
 end
 
 function get_prediction_variances(model_matrix::Array{Float64, 2})
@@ -308,33 +288,30 @@ Compute the ``D``-optimality of a given design's model matrix.
 # Examples
 
 ```jldoctest
-julia> using ExperimentalDesign, DataFrames
+julia> using ExperimentalDesign
 
-julia> A = [5. 2. -1. 2.; 5. 3. 0. 4.; -5. 1. -2. 3.; 0. 2. -1. 3.]
+julia> A = plackett_burman(4)
+4×3 Array{Int64,2}:
+  1   1   1
+  1  -1  -1
+ -1  -1   1
+ -1   1  -1
+
+julia> factors = OrderedDict([(:f1, [-1., 1.]), (:f2, [-1., 1.]), (:f3, [-1., 1.])])
+DataStructures.OrderedDict{Symbol,Array{Float64,1}} with 3 entries:
+  :f1 => [-1.0, 1.0]
+  :f2 => [-1.0, 1.0]
+  :f3 => [-1.0, 1.0]
+
+julia> m = generate_model_matrix(@formula(y ~ f1 + f2 + f3), float(A), factors)
 4×4 Array{Float64,2}:
-  5.0  2.0  -1.0  2.0
-  5.0  3.0   0.0  4.0
- -5.0  1.0  -2.0  3.0
-  0.0  2.0  -1.0  3.0
+ 1.0   1.0   1.0   1.0
+ 1.0   1.0  -1.0  -1.0
+ 1.0  -1.0  -1.0   1.0
+ 1.0  -1.0   1.0  -1.0
 
-julia> factors = [[-5., 0., 5.], [1., 2., 3.], [-2., -1., 0.], [2., 3., 4.]]
-4-element Array{Array{Float64,1},1}:
- [-5.0, 0.0, 5.0]
- [1.0, 2.0, 3.0]
- [-2.0, -1.0, 0.0]
- [2.0, 3.0, 4.0]
-
-julia> M = generate_model_matrix(@formula(y ~ x1 + x2 + x3 + x4), A, factors, scale = scale_boxdraper_encoding!)
-4×5 DataFrames.DataFrame
-│ Row │ I   │ x1       │ x2        │ x3        │ x4        │
-├─────┼─────┼──────────┼───────────┼───────────┼───────────┤
-│ 1   │ 1.0 │ 0.57735  │ 0.0       │ 0.0       │ -0.707107 │
-│ 2   │ 1.0 │ 0.57735  │ 0.707107  │ 0.707107  │ 0.707107  │
-│ 3   │ 1.0 │ -0.57735 │ -0.707107 │ -0.707107 │ 0.0       │
-│ 4   │ 1.0 │ 0.0      │ 0.0       │ 0.0       │ 0.0       │
-
-julia> d_optimality(Array(M))
-0.0
+julia> d_optimality(m)
+256.0
 
 ```
 
@@ -358,33 +335,30 @@ Compute a lower bound for the ``D``-efficiency of a given design's model matrix
 according to Castillo's "Process Optimization : A Statistical Approach".
 
 ```jldoctest
-julia> using ExperimentalDesign, DataFrames
+julia> using ExperimentalDesign
 
-julia> A = [5. 2. -1. 2.; 5. 3. 0. 4.; -5. 1. -2. 3.; 0. 2. -1. 3.]
+julia> A = plackett_burman(4)
+4×3 Array{Int64,2}:
+  1   1   1
+  1  -1  -1
+ -1  -1   1
+ -1   1  -1
+
+julia> factors = OrderedDict([(:f1, [-1., 1.]), (:f2, [-1., 1.]), (:f3, [-1., 1.])])
+DataStructures.OrderedDict{Symbol,Array{Float64,1}} with 3 entries:
+  :f1 => [-1.0, 1.0]
+  :f2 => [-1.0, 1.0]
+  :f3 => [-1.0, 1.0]
+
+julia> m = generate_model_matrix(@formula(y ~ f1 + f2 + f3), float(A), factors)
 4×4 Array{Float64,2}:
-  5.0  2.0  -1.0  2.0
-  5.0  3.0   0.0  4.0
- -5.0  1.0  -2.0  3.0
-  0.0  2.0  -1.0  3.0
+ 1.0   1.0   1.0   1.0
+ 1.0   1.0  -1.0  -1.0
+ 1.0  -1.0  -1.0   1.0
+ 1.0  -1.0   1.0  -1.0
 
-julia> factors = [[-5., 0., 5.], [1., 2., 3.], [-2., -1., 0.], [2., 3., 4.]]
-4-element Array{Array{Float64,1},1}:
- [-5.0, 0.0, 5.0]
- [1.0, 2.0, 3.0]
- [-2.0, -1.0, 0.0]
- [2.0, 3.0, 4.0]
-
-julia> M = generate_model_matrix(@formula(y ~ x1 + x2 + x3 + x4), A, factors, scale = scale_boxdraper_encoding!)
-4×5 DataFrames.DataFrame
-│ Row │ I   │ x1       │ x2        │ x3        │ x4        │
-├─────┼─────┼──────────┼───────────┼───────────┼───────────┤
-│ 1   │ 1.0 │ 0.57735  │ 0.0       │ 0.0       │ -0.707107 │
-│ 2   │ 1.0 │ 0.57735  │ 0.707107  │ 0.707107  │ 0.707107  │
-│ 3   │ 1.0 │ -0.57735 │ -0.707107 │ -0.707107 │ 0.0       │
-│ 4   │ 1.0 │ 0.0      │ 0.0       │ 0.0       │ 0.0       │
-
-julia> d_efficiency_lower_bound(Array(M))
-0.0
+julia> d_efficiency_lower_bound(m)
+1.0
 
 ```
 
@@ -490,16 +464,16 @@ function full_factorial_subset(factors::Array{T, 1}, experiments::Int) where T <
     return subset
 end
 
-function generate_designs(factors::Array{T, 1},
+function generate_designs(factors::DataStructures.OrderedDict,
                           formula::DataFrames.Formula,
                           sample_range::UnitRange{Int},
                           designs::Int;
                           check_bounds::Bool = true,
                           scale::Function = scale_orthogonal!,
-                          compute_all_metrics::Bool = false) where T <: Any
+                          compute_all_metrics::Bool = false)
     println("> Factors: ", factors)
 
-    full_factorial_size = prod(length, factors)
+    full_factorial_size = prod(length, values(factors))
     full_factorial_subsets = 2.0 ^ full_factorial_size
 
     println("> Full Factorial Size: ", full_factorial_size)
@@ -557,11 +531,10 @@ function generate_designs(factors::Array{T, 1},
 
 
     for i in 1:designs
-        samples      = rand(sample_range)
-        subset       = full_factorial_subset(factors, samples)
-        model_matrix = generate_model_matrix(formula, Array{Float64, 2}(subset), factors,
-                                             scale = scale)
-        candidate    = Array(model_matrix)
+        samples   = rand(sample_range)
+        subset    = full_factorial_subset(collect(values(factors)), samples)
+        candidate = generate_model_matrix(formula, Array{Float64, 2}(subset), factors,
+                                          scale = scale)
 
         if compute_all_metrics
             d_opt = d_optimality(candidate)
@@ -579,6 +552,10 @@ function generate_designs(factors::Array{T, 1},
                                log(2, abs(c_n)),
                                log(10, abs(d_opt))])
         else
+            if isapprox(1.0, d_efficiency_lower_bound(candidate))
+                println(candidate)
+            end
+
             push!(evaluation, [size(candidate, 1),
                                d_optimality(candidate),
                                d_efficiency_lower_bound(candidate)])
@@ -588,12 +565,13 @@ function generate_designs(factors::Array{T, 1},
     return evaluation
 end
 
-function sample_subset(factors,
-                       sample_range,
-                       designs;
-                       check_bounds = true,
-                       scale = scale_orthogonal!)
-    formula = build_linear_formula(length(factors))
+
+function sample_subset(factors::DataStructures.OrderedDict,
+                       sample_range::UnitRange{Int},
+                       designs::Int;
+                       check_bounds::Bool = true,
+                       scale::Function = scale_orthogonal!)
+    formula = build_linear_formula(collect(keys(factors)))
     #formula = @formula(y ~ x1 + x2 + x3)
 
     run_time = @elapsed sampling_subset = generate_designs(factors,
@@ -609,7 +587,7 @@ function sample_subset(factors,
     return sampling_subset
 end
 
-function sample_subsets(factors::Array,
+function sample_subsets(factors::Array{OrderedDict{Symbol, Array{Float64, 1}}, 1},
                         ranges::Array{UnitRange{Int}, 1},
                         designs::Int;
                         check_bounds::Bool = true,
@@ -627,7 +605,7 @@ function sample_subsets(factors::Array,
                           ranges[subset].stop, " Experiments")
         end
 
-        label = string(label, ", ", length(factors[subset]), " Factors")
+        label = string(label, ", ", length(keys(factors[subset])), " Factors")
 
         sampled_subset = sample_subset(factors[subset],
                                        ranges[subset],
@@ -638,8 +616,7 @@ function sample_subsets(factors::Array,
         push!(
               sampled_subsets,
               (sampled_subset,
-              max(sampled_subset[:D]...),
-              label)
+               label)
              )
     end
 
@@ -650,7 +627,7 @@ function check_zero(x, tol = 1e-4)
     return isapprox(x, 0.0, atol = tol) ? 0.0 : x
 end
 
-function plot_subsets(sampled_subsets; columns = [:D, :DELB, :Length])
+function plot_subsets(sampled_subsets; columns = [:DELB])
     upscale = 2
     small_font = Plots.font("sans-serif", 10.0 * upscale)
     large_font = Plots.font("sans-serif", 14.0 * upscale)
@@ -672,19 +649,20 @@ function plot_subsets(sampled_subsets; columns = [:D, :DELB, :Length])
 
         push!(subplots,
               histogram(Array(subset[1][:D]), labels = "Designs",
-                        title = string("D-Optimality for ", subset[3]),
+                        title = string("D-Optimality for ", subset[2]),
                         color = :lightblue),
               histogram(Array(subset[1][:DELB]), labels = "Designs",
-                        title = string("D-Efficiency for ", subset[3]),
+                        title = string("D-Efficiency for ", subset[2]),
                         color = :darkorange))
 
         for column in columns
             push!(subplots,
                   plot(Array(subset[1][column]),
                        ylims = (0, max(subset[1][column]...)),
-                       labels = reshape(columns, (1, length(columns))),
-                       title = subset[3],
+                       labels = column,
+                       title = subset[2],
                        linestyle = :solid,
+                       color = :darkorange,
                        linealpha=1.0,
                        linewidth=1.5 * upscale))
         end

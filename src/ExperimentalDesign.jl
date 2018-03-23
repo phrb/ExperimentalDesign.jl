@@ -2,8 +2,12 @@ __precompile__()
 
 module ExperimentalDesign
 
+using Reexport
+
+@reexport using DataFrames
+@reexport using DataStructures
+
 using IterTools,
-      DataFrames,
       StatsBase,
       StatPlots,
       Primes
@@ -20,7 +24,9 @@ export plot_subsets,
 export scale_orthogonal!,
        scale_boxdraper_encoding!,
        generate_model_matrix,
-       get_prediction_variances
+       get_prediction_variances,
+       build_linear_formula,
+       get_model_variables
 
 export condition_number,
        d_optimality,

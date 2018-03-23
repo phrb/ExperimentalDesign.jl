@@ -5,12 +5,12 @@ scale_orthogonal!(design::Array{Float64, 2}, factors::Array{T, 1}) where T <: An
 
 scale_boxdraper_encoding!(design::Array{Float64, 2},
                           factors::Array{T, 1};
-                          scale_denominator = false) where T <: Any
+                          scale_denominator = true) where T <: Any
 
 generate_model_matrix(formula::DataFrames.Formula,
                       design::Array{Float64, 2},
-                      factors::Array{T, 1};
-                      scale::Function = scale_orthogonal!) where T <: Any
+                      factors::DataStructures.OrderedDict;
+                      scale::Function = scale_boxdraper_encoding!)
 
 d_optimality(model_matrix::Array{Float64, 2})
 
