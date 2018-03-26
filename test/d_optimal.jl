@@ -1,11 +1,11 @@
 using ExperimentalDesign, DataStructures
 
-factors = 80
+factors = 10
 
-ranges = [k:k for k = factors:10:2*factors]
+ranges = [k:k for k = factors:2:(2 * factors)]
 
 factor_dict = [OrderedDict([(Symbol(:f, j), [1., 2.]) for j = 1:factors]) for i in ranges]
 
-designs = 8000
+designs = 400
 
 sampled_subsets = sample_subsets(factor_dict, ranges, designs, check_bounds = false)

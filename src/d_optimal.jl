@@ -464,16 +464,13 @@ function full_factorial_subset(factors::Array{T, 1}, experiments::Int) where T <
     return subset
 end
 
-function generate_designs(factors::DataStructures.OrderedDict,
-                          formula::DataFrames.Formula,
-                          sample_range::UnitRange{Int},
-                          designs::Int;
-                          check_bounds::Bool = true,
-                          scale::Function = scale_boxdraper_encoding!,
-                          compute_all_metrics::Bool = false)
+function enforce_bounds(factors::DataStructures.OrderedDict,
+                        sample_range::UnitRange{Int},
+                        designs::Int,
+                        check_bounds::Bool)
     println("> Factors: ", factors)
 
-    full_factorial_size = prod(length, values(factors))
+    full_factorial_size    = prod(length, values(factors))
     full_factorial_subsets = 2.0 ^ full_factorial_size
 
     println("> Full Factorial Size: ", full_factorial_size)
@@ -506,29 +503,29 @@ function generate_designs(factors::DataStructures.OrderedDict,
                     full_factorial_size, " instead")
             sample_range = sample_range.start:full_factorial_size
         end
-
     else
         println("> WARNING: Skipping bounds check!")
     end
 
-    if compute_all_metrics
-        evaluation = DataFrame(Length  = [],
-                               D       = [],
-                               DELB    = [],
-                               DELB_ad = [],
-                               A       = [],
-                               V       = [],
-                               G       = [],
-                               CN      = [],
-                               GE      = [],
-                               log2CN  = [],
-                               log10D  = [])
-    else
-        evaluation = DataFrame(Length  = [],
-                               D       = [],
-                               DELB    = [])
-    end
+    return designs, sample_range
+end
 
+function evaluate_all_metrics(factors::DataStructures.OrderedDict,
+                              formula::DataFrames.Formula,
+                              sample_range::UnitRange{Int},
+                              designs::Int,
+                              scale::Function)
+    evaluation = DataFrame(Length  = [],
+                           D       = [],
+                           DELB    = [],
+                           DELB_ad = [],
+                           A       = [],
+                           V       = [],
+                           G       = [],
+                           CN      = [],
+                           GE      = [],
+                           log2CN  = [],
+                           log10D  = [])
 
     for i in 1:designs
         samples   = rand(sample_range)
@@ -536,33 +533,71 @@ function generate_designs(factors::DataStructures.OrderedDict,
         candidate = generate_model_matrix(formula, Array{Float64, 2}(subset), factors,
                                           scale = scale)
 
-        if compute_all_metrics
-            d_opt = d_optimality(candidate)
-            c_n   = condition_number(candidate)
+        d_opt = d_optimality(candidate)
+        c_n   = condition_number(candidate)
 
-            push!(evaluation, [size(candidate, 1),
-                               d_opt,
-                               d_efficiency_lower_bound(candidate),
-                               d_efficiency_lower_bound_algdesign(candidate),
-                               a_optimality(candidate),
-                               v_optimality(candidate),
-                               g_optimality(candidate),
-                               c_n,
-                               g_efficiency(candidate),
-                               log(2, abs(c_n)),
-                               log(10, abs(d_opt))])
-        else
-            if isapprox(1.0, d_efficiency_lower_bound(candidate))
-                println(candidate)
-            end
-
-            push!(evaluation, [size(candidate, 1),
-                               d_optimality(candidate),
-                               d_efficiency_lower_bound(candidate)])
-        end
+        push!(evaluation, [size(candidate, 1),
+                           d_opt,
+                           d_efficiency_lower_bound(candidate),
+                           d_efficiency_lower_bound_algdesign(candidate),
+                           a_optimality(candidate),
+                           v_optimality(candidate),
+                           g_optimality(candidate),
+                           c_n,
+                           g_efficiency(candidate),
+                           log(2, abs(c_n)),
+                           log(10, abs(d_opt))])
     end
 
     return evaluation
+end
+
+function evaluate_metrics(factors::DataStructures.OrderedDict,
+                          formula::DataFrames.Formula,
+                          sample_range::UnitRange{Int},
+                          designs::Int,
+                          scale::Function)
+    evaluation = DataFrame(Length  = [],
+                           D       = [],
+                           DELB    = [])
+
+    for i in 1:designs
+        samples   = rand(sample_range)
+        subset    = full_factorial_subset(collect(values(factors)), samples)
+        candidate = generate_model_matrix(formula, Array{Float64, 2}(subset), factors,
+                                          scale = scale)
+
+        push!(evaluation, [size(candidate, 1),
+                           d_optimality(candidate),
+                           d_efficiency_lower_bound(candidate)])
+    end
+
+    return evaluation
+end
+
+function generate_designs(factors::DataStructures.OrderedDict,
+                          formula::DataFrames.Formula,
+                          sample_range::UnitRange{Int},
+                          designs::Int;
+                          check_bounds::Bool = true,
+                          scale::Function = scale_boxdraper_encoding!,
+                          compute_all_metrics::Bool = false)
+    designs, sample_range = enforce_bounds(factors, sample_range,
+                                           designs, check_bounds)
+
+    if compute_all_metrics
+        return evaluate_all_metrics(factors::DataStructures.OrderedDict,
+                                    formula::DataFrames.Formula,
+                                    sample_range::UnitRange{Int},
+                                    designs::Int,
+                                    scale::Function)
+    else
+        return evaluate_metrics(factors::DataStructures.OrderedDict,
+                                formula::DataFrames.Formula,
+                                sample_range::UnitRange{Int},
+                                designs::Int,
+                                scale::Function)
+    end
 end
 
 
@@ -572,7 +607,9 @@ function sample_subset(factors::DataStructures.OrderedDict,
                        check_bounds::Bool = true,
                        scale::Function = scale_boxdraper_encoding!)
     formula = build_linear_formula(collect(keys(factors)))
-    #formula = @formula(y ~ x1 + x2 + x3)
+
+    # Any formula could potentially be used here:
+    #   formula = @formula(y ~ x1 * x2 + x3)
 
     run_time = @elapsed sampling_subset = generate_designs(factors,
                                                            formula,
@@ -613,22 +650,28 @@ function sample_subsets(factors::Array{OrderedDict{Symbol, Array{Float64, 1}}, 1
                                        check_bounds = check_bounds,
                                        scale = scale)
 
-        push!(
-              sampled_subsets,
-              (sampled_subset,
-               label)
-             )
+        push!(sampled_subsets, (sampled_subset, label))
     end
 
     return sampled_subsets
 end
 
-function check_zero(x, tol = 1e-4)
+function replace_zero(x, tol = 1e-4)
     return isapprox(x, 0.0, atol = tol) ? 0.0 : x
 end
 
-function plot_subsets(sampled_subsets; columns = [:DELB])
-    upscale = 2
+function replace_inf(x, lim = 1e5)
+    if x == Inf
+        return lim
+    elseif x == -Inf
+        return -lim
+    else
+        return x
+    end
+end
+
+function plot_subsets(sampled_subsets; columns = [:D, :DELB])
+    upscale    = 2
     small_font = Plots.font("sans-serif", 10.0 * upscale)
     large_font = Plots.font("sans-serif", 14.0 * upscale)
     default(titlefont  = large_font,
@@ -644,30 +687,25 @@ function plot_subsets(sampled_subsets; columns = [:DELB])
 
     for subset in sampled_subsets
         for column in columns
-            subset[1][column] = check_zero.(subset[1][column])
+            subset[1][column] = replace_inf(subset[1][column])
+            subset[1][column] = replace_zero.(subset[1][column])
         end
+
+        max_d = max(subset[1][:D]...)
+        max_x = max_d == 0.0 ? string(max_d) : string("1e",
+                                                      floor(log(10, max_d)))
 
         push!(subplots,
               histogram(Array(subset[1][:D]), labels = "Designs",
-                        title = string("D-Optimality for ", subset[2]),
-                        color = :lightblue),
+                        title  = string("D-Optimality for ", subset[2]),
+                        xticks = ([0, max_d],
+                                  ["0", max_x]),
+                        color  = :lightblue),
               histogram(Array(subset[1][:DELB]), labels = "Designs",
                         title = string("D-Efficiency for ", subset[2]),
-                        color = :darkorange))
-
-        for column in columns
-            push!(subplots,
-                  plot(Array(subset[1][column]),
-                       ylims = (0, max(subset[1][column]...)),
-                       labels = column,
-                       title = subset[2],
-                       linestyle = :solid,
-                       color = :darkorange,
-                       linealpha=1.0,
-                       linewidth=1.5 * upscale))
-        end
+                        xlims = (0.0, 1.0),
+                        color = :lightgreen))
     end
 
-    plot(subplots...,
-         layout = (length(sampled_subsets), 2 + length(columns)))
+    plot(subplots..., layout = (length(sampled_subsets), 2))
 end
