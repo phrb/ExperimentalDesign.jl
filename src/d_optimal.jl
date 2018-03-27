@@ -480,9 +480,9 @@ function enforce_bounds(factors::DataStructures.OrderedDict,
 
     if check_bounds
         if sample_range.start == sample_range.stop
-            restricted_subsets = factorial(float(full_factorial_size)) /
-                                 (factorial(float(full_factorial_size - sample_range.start)) *
-                                 factorial(float(sample_range.start)))
+            restricted_subsets = floor(Int, factorial(float(full_factorial_size)) /
+                                       (factorial(float(full_factorial_size - sample_range.start)) *
+                                       factorial(float(sample_range.start))))
             println("> Total Subsets for Fixed Size ",
                     sample_range.start, ": ",
                     restricted_subsets)
