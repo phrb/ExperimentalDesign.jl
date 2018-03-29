@@ -2,7 +2,7 @@ using ExperimentalDesign, DataStructures
 
 factors = 10
 
-ranges = [k:k for k = factors:2:(2 * factors)]
+ranges = [k:k for k = (factors + 1):2:((2 * factors) + 1)]
 
 factor_dict = [OrderedDict([(Symbol(:f, j), [1., 2.]) for j = 1:factors]) for i in ranges]
 

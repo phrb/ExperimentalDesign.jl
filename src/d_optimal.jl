@@ -196,6 +196,85 @@ function scale_boxdraper_encoding!(design::Array{Float64, 2},
     return design
 end
 
+function get_expanded_values(factors::OrderedDict)
+    expanded_values = OrderedDict()
+    for factor in factors
+        if typeof(factor[2]) != Array{Float64, 1}
+            expanded_values[factor[1]] = OrderedDict()
+            for l = 2:length(factor[2])
+                expanded_values[factor[1]][factor[2][l]] = Symbol(factor[1], "_$(l - 1)")
+            end
+        end
+    end
+    return expanded_values
+end
+
+function expand_design(design, factors)
+    small_design = DataFrame(design)
+    rename!(small_design, OrderedDict(zip(names(small_design), keys(factors))))
+
+    exp_values = get_expanded_values(factors)
+    expanded_design = DataFrame()
+
+    for name in names(small_design)
+        if name in keys(exp_values)
+            for key in keys(exp_values[name])
+                expanded_design[exp_values[name][key]] = [small_design[i, name] == key ? 1.0 : 0. for i = 1:length(small_design[name])]
+            end
+        else
+            expanded_design[name] = small_design[name]
+        end
+    end
+
+    return expanded_design
+end
+
+"""
+    expand_factors(factors::DataStructures.OrderedDict)
+
+Return an `OrderedDict` with true factors expanded to `[0., 1.]` 2-level numerical factors.
+
+For a true factor with ``n`` levels, creates ``n - 1`` 2-level factors. Only
+one of these new factors can be at level `1.` at each row of a design, encoding
+each level of the original factor. The first level of the original factor is
+encoded by all new factors being at level `0.`.
+
+# Examples
+```jldoctest
+julia> using ExperimentalDesign
+
+julia> A = OrderedDict([(:A, [1., 2.]), (:B, [1, 2, 3, 4]), (:C, ["A", "B"]), (:D, [1.2, 3.4])])
+DataStructures.OrderedDict{Symbol,Array{T,1} where T} with 4 entries:
+  :A => [1.0, 2.0]
+  :B => [1, 2, 3, 4]
+  :C => String["A", "B"]
+  :D => [1.2, 3.4]
+
+julia> expand_factors(A)
+DataStructures.OrderedDict{Symbol,Any} with 6 entries:
+  :A   => [1.0, 2.0]
+  :B_1 => [0.0, 1.0]
+  :B_2 => [0.0, 1.0]
+  :B_3 => [0.0, 1.0]
+  :C_1 => [0.0, 1.0]
+  :D   => [1.2, 3.4]
+
+```
+"""
+function expand_factors(factors::DataStructures.OrderedDict)
+    expanded_factors = OrderedDict{Symbol, Any}()
+    for factor in factors
+        if typeof(factor[2]) != Array{Float64, 1}
+            for l = 1:(length(factor[2]) - 1)
+                expanded_factors[Symbol(factor[1], "_$l")] = [0., 1.]
+            end
+        else
+            expanded_factors[factor[1]] = factor[2]
+        end
+    end
+    return expanded_factors
+end
+
 """
     generate_model_matrix(formula::DataFrames.Formula,
                           design::Array{Float64, 2},
@@ -234,16 +313,20 @@ julia> m = generate_model_matrix(@formula(y ~ f1 + f2 + f3), float(A), factors)
 ```
 """
 function generate_model_matrix(formula::DataFrames.Formula,
-                               design::Array{Float64, 2},
+                               design::Array{T, 2},
                                factors::DataStructures.OrderedDict;
-                               scale::Function = scale_boxdraper_encoding!)
-    variables  = get_model_variables(formula)
+                               scale::Function = scale_boxdraper_encoding!) where T <: Any
+    design    = Array(expand_design(design, factors))
+
+    factors   = expand_factors(factors)
+    formula   = build_linear_formula(collect(keys(factors)))
+    variables = get_model_variables(formula)
 
     # We are assuming a linear formula, a non-linear formula would mess scaling
     design      = hcat(ones(size(design, 1)), design)
     factors     = OrderedDict(vcat(Pair(:I, [-1., 1.]), [f for f in factors]))
-
     design      = DataFrame(scale(design, collect(values(factors))))
+
     rename!(design, OrderedDict(zip(names(design), keys(factors))))
 
     new_design  = DataFrame(I = design[:I])
@@ -435,10 +518,10 @@ function condition_number(model_matrix::Array{Float64, 2})
 end
 
 function sample_full_factorial(factors::Array{T, 1}) where T <: Any
-    return Array{Float64, 1}([rand(i) for i in factors])
+    return Array{Any, 1}([rand(i) for i in factors])
 end
 
-function check_repeated_row(subset::SharedArray{Float64, 2}, row::Array{Float64, 1})
+function check_repeated_row(subset::Array{T, 2}, row::Array{T, 1}) where T <: Any
     for j = 1:size(subset, 1)
         if subset[j, :] == row
             return true
@@ -449,9 +532,9 @@ function check_repeated_row(subset::SharedArray{Float64, 2}, row::Array{Float64,
 end
 
 function full_factorial_subset(factors::Array{T, 1}, experiments::Int) where T <: Any
-    subset = fill!(SharedArray{Float64, 2}(experiments, size(factors, 1)), 0.0)
+    subset = fill!(Array{Any, 2}(experiments, size(factors, 1)), 0.0)
 
-    @sync @parallel for i = 1:experiments
+    for i = 1:experiments
         sample_row = sample_full_factorial(factors)
 
         while check_repeated_row(subset, sample_row)
@@ -480,9 +563,9 @@ function enforce_bounds(factors::DataStructures.OrderedDict,
 
     if check_bounds
         if sample_range.start == sample_range.stop
-            restricted_subsets = floor(Int, factorial(float(full_factorial_size)) /
-                                       (factorial(float(full_factorial_size - sample_range.start)) *
-                                       factorial(float(sample_range.start))))
+            restricted_subsets = factorial(float(full_factorial_size)) /
+                                 (factorial(float(full_factorial_size - sample_range.start)) *
+                                 factorial(float(sample_range.start)))
             println("> Total Subsets for Fixed Size ",
                     sample_range.start, ": ",
                     restricted_subsets)
@@ -530,7 +613,7 @@ function evaluate_all_metrics(factors::DataStructures.OrderedDict,
     for i in 1:designs
         samples   = rand(sample_range)
         subset    = full_factorial_subset(collect(values(factors)), samples)
-        candidate = generate_model_matrix(formula, Array{Float64, 2}(subset), factors,
+        candidate = generate_model_matrix(formula, subset, factors,
                                           scale = scale)
 
         d_opt = d_optimality(candidate)
@@ -624,7 +707,7 @@ function sample_subset(factors::DataStructures.OrderedDict,
     return sampling_subset
 end
 
-function sample_subsets(factors::Array{OrderedDict{Symbol, Array{Float64, 1}}, 1},
+function sample_subsets(factors::Array{OrderedDict{Symbol, Any}, 1},
                         ranges::Array{UnitRange{Int}, 1},
                         designs::Int;
                         check_bounds::Bool = true,
@@ -685,6 +768,15 @@ function plot_subsets(sampled_subsets; columns = [:D, :DELB])
 
     subplots = []
 
+    global_max_d = 0.0
+
+    for subset in sampled_subsets
+        global_max_d = max(global_max_d, subset[1][:D]...)
+    end
+
+    global_max_x = global_max_d == 0.0 ? string(global_max_d) : string("1e",
+                                                                       floor(log(10, global_max_d)))
+
     for subset in sampled_subsets
         for column in columns
             subset[1][column] = replace_inf(subset[1][column])
@@ -697,15 +789,18 @@ function plot_subsets(sampled_subsets; columns = [:D, :DELB])
 
         push!(subplots,
               histogram(Array(subset[1][:D]), labels = "Designs",
+                        normalize = :probability,
                         title  = string("D-Optimality for ", subset[2]),
-                        xticks = ([0, max_d],
-                                  ["0", max_x]),
+                        xticks = ([0, max_d, global_max_d],
+                                  ["0", max_x, global_max_x]),
+                        xlims = (0.0, global_max_d),
                         color  = :lightblue),
               histogram(Array(subset[1][:DELB]), labels = "Designs",
+                        normalize = :probability,
                         title = string("D-Efficiency for ", subset[2]),
                         xlims = (0.0, 1.0),
                         color = :lightgreen))
     end
 
-    plot(subplots..., layout = (length(sampled_subsets), 2))
+    plot(subplots..., legend = false, layout = (length(sampled_subsets), 2))
 end

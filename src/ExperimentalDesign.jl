@@ -1,4 +1,4 @@
-__precompile__()
+#__precompile__()
 
 module ExperimentalDesign
 
@@ -19,6 +19,8 @@ export plackett_burman,
 export plot_subsets,
        sample_subsets,
        sample_subset,
+       full_factorial_subset,
+       expand_factors,
        generate_designs
 
 export scale_orthogonal!,

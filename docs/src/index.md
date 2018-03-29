@@ -7,6 +7,8 @@ scale_boxdraper_encoding!(design::Array{Float64, 2},
                           factors::Array{T, 1};
                           scale_denominator = true) where T <: Any
 
+expand_factors(factors::DataStructures.OrderedDict)
+
 generate_model_matrix(formula::DataFrames.Formula,
                       design::Array{Float64, 2},
                       factors::DataStructures.OrderedDict;
