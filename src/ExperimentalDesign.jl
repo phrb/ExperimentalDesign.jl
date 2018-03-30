@@ -11,9 +11,10 @@ import Primes: primes
 import DataStructures: OrderedDict
 
 import DataFrames: DataFrame,
-                   Formula,
-                   Terms,
                    rename!
+
+import StatsModels: Formula,
+                    Terms
 
 # Plackett-Burman Designs
 

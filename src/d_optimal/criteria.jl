@@ -22,7 +22,7 @@ Compute the ``D``-optimality of a given design's model matrix.
 # Examples
 
 ```jldoctest
-julia> using ExperimentalDesign, DataStructures, DataFrames
+julia> using ExperimentalDesign, DataStructures, StatsModels
 
 julia> A = plackett_burman(4)
 4×3 Array{Int64,2}:
@@ -69,7 +69,7 @@ Compute a lower bound for the ``D``-efficiency of a given design's model matrix
 according to Castillo's "Process Optimization : A Statistical Approach".
 
 ```jldoctest
-julia> using ExperimentalDesign, DataStructures, DataFrames
+julia> using ExperimentalDesign, DataStructures, StatsModels
 
 julia> A = plackett_burman(4)
 4×3 Array{Int64,2}:

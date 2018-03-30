@@ -19,7 +19,7 @@ limits.
 # Examples
 
 ```jldoctest
-julia> using ExperimentalDesign, DataStructures, DataFrames
+julia> using ExperimentalDesign, DataStructures, StatsModels
 
 julia> A = [5. 2. -1.; 5. 3. 0.; -5. 1. -2.]
 3×3 Array{Float64,2}:
@@ -91,7 +91,7 @@ Scale factors of a design using the Box and Draper's coding convention from
 With denominator scaling:
 
 ```jldoctest
-julia> using ExperimentalDesign, DataStructures, DataFrames
+julia> using ExperimentalDesign, DataStructures, StatsModels
 
 julia> A = float(plackett_burman(4))
 4×3 Array{Float64,2}:
@@ -121,7 +121,7 @@ true
 Without denominator scaling:
 
 ```jldoctest
-julia> using ExperimentalDesign, DataStructures, DataFrames
+julia> using ExperimentalDesign, DataStructures, StatsModels
 
 julia> A = float(plackett_burman(4))
 4×3 Array{Float64,2}:
@@ -241,7 +241,7 @@ encoded by all new factors being at level `0.`.
 
 # Examples
 ```jldoctest
-julia> using ExperimentalDesign, DataStructures, DataFrames
+julia> using ExperimentalDesign, DataStructures, StatsModels
 
 julia> A = OrderedDict([(:A, [1., 2.]), (:B, [1, 2, 3, 4]), (:C, ["A", "B"]), (:D, [1.2, 3.4])])
 DataStructures.OrderedDict{Symbol,Array{T,1} where T} with 4 entries:
@@ -288,7 +288,7 @@ Assumes that `formula` is a linear relationship between all the factors in `fact
 # Examples
 
 ```jldoctest
-julia> using ExperimentalDesign, DataStructures, DataFrames
+julia> using ExperimentalDesign, DataStructures, StatsModels
 
 julia> A = plackett_burman(4)
 4×3 Array{Int64,2}:
