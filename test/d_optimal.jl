@@ -4,7 +4,7 @@ factors = 10
 
 ranges = [k:k for k = (factors + 1):2:((2 * factors) + 1)]
 
-factor_dict = [OrderedDict([(Symbol(:f, j), [1., 2.]) for j = 1:factors]) for i in ranges]
+factor_dict = [OrderedDict{Symbol, Any}([(Symbol(:f, j), [1., 2.]) for j = 1:factors]) for i in ranges]
 
 designs = 400
 

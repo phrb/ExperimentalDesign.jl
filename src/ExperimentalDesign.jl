@@ -1,20 +1,27 @@
-#__precompile__()
+__precompile__()
 
 module ExperimentalDesign
 
-using Reexport
+using StatPlots
 
-@reexport using DataFrames
-@reexport using DataStructures
+import StatsBase: counts
 
-using IterTools,
-      StatsBase,
-      StatPlots,
-      Primes
+import Primes: primes
+
+import DataStructures: OrderedDict
+
+import DataFrames: DataFrame,
+                   Formula,
+                   Terms,
+                   rename!
+
+# Plackett-Burman Designs
 
 export plackett_burman,
        is_plackett_burman,
        paley
+
+# D-Optimal Designs
 
 export plot_subsets,
        sample_subsets,
@@ -39,7 +46,10 @@ export condition_number,
        d_efficiency_lower_bound,
        d_efficiency_lower_bound_algdesign
 
-include("plackett_burman.jl")
-include("d_optimal.jl")
+include("plackett_burman/plackett_burman.jl")
+include("d_optimal/modeling.jl")
+include("d_optimal/criteria.jl")
+include("d_optimal/sampling.jl")
+include("d_optimal/plotting.jl")
 
 end

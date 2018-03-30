@@ -17,6 +17,6 @@ end
 
 factor_list = [factors for i in ranges]
 
-designs = 8000
+designs = 300
 
 sampled_subsets = sample_subsets(factor_list, ranges, designs, check_bounds = true)
