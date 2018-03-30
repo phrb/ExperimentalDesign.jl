@@ -23,9 +23,8 @@ matrix:
 #before_script: # homebrew for mac
 #  - if [ $TRAVIS_OS_NAME = osx ]; then brew install gcc; fi
 
-## uncomment the following lines to override the default test script
-#script:
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("ExperimentalDesign"); Pkg.test("ExperimentalDesign"; coverage=true)'
+script:
+  - julia -e 'Pkg.clone(pwd()); Pkg.build("ExperimentalDesign"); Pkg.test("ExperimentalDesign"; coverage=true)'
 
 after_success:
   # push coverage results to Coveralls
