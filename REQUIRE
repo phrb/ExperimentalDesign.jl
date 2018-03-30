@@ -1,6 +1,4 @@
-julia 0.6
-Reexport
-IterTools
+julia 0.6.2
 DataFrames
 DataStructures
 StatsBase
