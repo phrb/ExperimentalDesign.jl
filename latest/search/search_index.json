@@ -1,0 +1,14 @@
+{
+    "docs": [
+        {
+            "location": "/", 
+            "text": "ExperimentalDesign.jl Documentation\n\n\n@autodocs\nModules = [ExperimentalDesign]", 
+            "title": "Home"
+        }, 
+        {
+            "location": "/#experimentaldesignjl-documentation", 
+            "text": "@autodocs\nModules = [ExperimentalDesign]", 
+            "title": "ExperimentalDesign.jl Documentation"
+        }
+    ]
+}
