@@ -196,11 +196,37 @@ function scale_boxdraper_encoding!(design::Array{Float64, 2},
     return design
 end
 
+"""
+    get_expanded_values(factors::OrderedDict)
+
+Return a mapping from an original level of a factor to a column
+in an expanded design. Does not expand factors.
+
+# Examples
+
+```jldoctest
+julia> using ExperimentalDesign, DataStructures, StatsModels
+
+julia> A = OrderedDict(:A => [1., 2.], :B => [1, 2, 3, 4], :C => ["A", "B"], :D => [1.2, 2.2, 3.4], :E => [:a, :b, :c, :d])
+DataStructures.OrderedDict{Symbol,Any} with 5 entries:
+  :A => [1.0, 2.0]
+  :B => [1, 2, 3, 4]
+  :C => String["A", "B"]
+  :D => [1.2, 2.2, 3.4]
+  :E => Symbol[:a, :b, :c, :d]
+
+julia> get_expanded_values(A)
+DataStructures.OrderedDict{Any,Any} with 2 entries:
+  :C => DataStructures.OrderedDict{Any,Symbol}("B"=>:C_1)
+  :E => DataStructures.OrderedDict{Any,Symbol}(:b=>:E_1,:c=>:E_2,:d=>:E_3)
+
+```
+"""
 function get_expanded_values(factors::OrderedDict)
     expanded_values = OrderedDict()
     for factor in factors
-        if typeof(factor[2]) != Array{Float64, 1}
-            expanded_values[factor[1]] = OrderedDict()
+        if !(eltype(factor[2]) <: Real)
+            expanded_values[factor[1]] = OrderedDict{Any, Symbol}()
             for l = 2:length(factor[2])
                 expanded_values[factor[1]][factor[2][l]] = Symbol(factor[1], "_$(l - 1)")
             end
@@ -209,7 +235,7 @@ function get_expanded_values(factors::OrderedDict)
     return expanded_values
 end
 
-function expand_design(design, factors)
+function expand_design(design::Array{T, 2}, factors::OrderedDict) where T <: Any
     small_design = DataFrame(design)
     rename!(small_design, OrderedDict(zip(names(small_design), keys(factors))))
 
@@ -243,28 +269,30 @@ encoded by all new factors being at level `0.`.
 ```jldoctest
 julia> using ExperimentalDesign, DataStructures, StatsModels
 
-julia> A = OrderedDict([(:A, [1., 2.]), (:B, [1, 2, 3, 4]), (:C, ["A", "B"]), (:D, [1.2, 3.4])])
-DataStructures.OrderedDict{Symbol,Array{T,1} where T} with 4 entries:
+julia> A = OrderedDict(:A => [1., 2.], :B => [1, 2, 3, 4], :C => ["A", "B"], :D => [1.2, 2.2, 3.4], :E => [:a, :b, :c, :d])
+DataStructures.OrderedDict{Symbol,Any} with 5 entries:
   :A => [1.0, 2.0]
   :B => [1, 2, 3, 4]
   :C => String["A", "B"]
-  :D => [1.2, 3.4]
+  :D => [1.2, 2.2, 3.4]
+  :E => Symbol[:a, :b, :c, :d]
 
 julia> expand_factors(A)
-DataStructures.OrderedDict{Symbol,Any} with 6 entries:
+DataStructures.OrderedDict{Symbol,Any} with 7 entries:
   :A   => [1.0, 2.0]
-  :B_1 => [0.0, 1.0]
-  :B_2 => [0.0, 1.0]
-  :B_3 => [0.0, 1.0]
+  :B   => [1, 2, 3, 4]
   :C_1 => [0.0, 1.0]
-  :D   => [1.2, 3.4]
+  :D   => [1.2, 2.2, 3.4]
+  :E_1 => [0.0, 1.0]
+  :E_2 => [0.0, 1.0]
+  :E_3 => [0.0, 1.0]
 
 ```
 """
 function expand_factors(factors::OrderedDict)
     expanded_factors = OrderedDict{Symbol, Any}()
     for factor in factors
-        if typeof(factor[2]) != Array{Float64, 1}
+        if !(eltype(factor[2]) <: Real)
             for l = 1:(length(factor[2]) - 1)
                 expanded_factors[Symbol(factor[1], "_$l")] = [0., 1.]
             end

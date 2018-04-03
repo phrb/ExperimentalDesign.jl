@@ -183,7 +183,7 @@ function sample_subset(factors::OrderedDict,
                                                            scale = scale)
     println("> Elapsed Time: ", run_time, " seconds")
 
-    sort!(sampling_subset, cols = :D, rev = true)
+    sort!(sampling_subset, :D, rev = true)
 
     return sampling_subset
 end

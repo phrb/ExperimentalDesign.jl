@@ -1,4 +1,4 @@
-__precompile__()
+#__precompile__()
 
 module ExperimentalDesign
 
@@ -28,6 +28,8 @@ export plot_subsets,
        sample_subsets,
        sample_subset,
        full_factorial_subset,
+       get_expanded_values,
+       expand_design,
        expand_factors,
        generate_designs
 
