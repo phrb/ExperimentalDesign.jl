@@ -6,4 +6,4 @@ makedocs(format   = :html,
 
 deploydocs(repo   = "github.com/phrb/ExperimentalDesign.jl.git",
            deps   = Deps.pip("mkdocs", "python-markdown-math"),
-           julia  = "0.6")
+           julia  = "0.6.2")

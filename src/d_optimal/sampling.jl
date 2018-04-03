@@ -128,7 +128,7 @@ function evaluate_metrics(factors::OrderedDict,
     for i in 1:designs
         samples   = rand(sample_range)
         subset    = full_factorial_subset(collect(values(factors)), samples)
-        candidate = generate_model_matrix(formula, Array{Float64, 2}(subset), factors,
+        candidate = generate_model_matrix(formula, subset, factors,
                                           scale = scale)
 
         push!(evaluation, [size(candidate, 1),
