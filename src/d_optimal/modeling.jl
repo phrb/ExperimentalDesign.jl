@@ -344,7 +344,7 @@ function generate_model_matrix(formula::Formula,
                                design::Array{T, 2},
                                factors::OrderedDict;
                                scale::Function = scale_boxdraper_encoding!) where T <: Any
-    design    = Array(expand_design(design, factors))
+    design    = Array{Float64, 2}(expand_design(design, factors))
 
     factors   = expand_factors(factors)
     formula   = build_linear_formula(collect(keys(factors)))

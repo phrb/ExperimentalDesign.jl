@@ -12,7 +12,7 @@ function replace_inf(x, lim = 1e5)
     end
 end
 
-function plot_subsets(sampled_subsets; columns = [:D, :DELB])
+function plot_subsets(sampled_subsets, factor_title = " "; columns = [:D, :DELB])
     upscale    = 2
     small_font = Plots.font("sans-serif", 10.0 * upscale)
     large_font = Plots.font("sans-serif", 14.0 * upscale)
@@ -29,8 +29,10 @@ function plot_subsets(sampled_subsets; columns = [:D, :DELB])
 
     global_max_d = 0.0
 
+    sampled_subsets = deepcopy(sampled_subsets)
+
     for subset in sampled_subsets
-        global_max_d = max(global_max_d, subset[1][:D]...)
+        global_max_d = max(global_max_d, subset[:D]...)
     end
 
     global_max_x = global_max_d == 0.0 ? string(global_max_d) : string("1e",
@@ -38,28 +40,33 @@ function plot_subsets(sampled_subsets; columns = [:D, :DELB])
 
     for subset in sampled_subsets
         for column in columns
-            subset[1][column] = replace_inf(subset[1][column])
-            subset[1][column] = replace_zero.(subset[1][column])
+            subset[column] = replace_inf(subset[column])
+            subset[column] = replace_zero.(subset[column])
         end
 
-        max_d = max(subset[1][:D]...)
+        max_d = max(subset[:D]...)
         max_x = max_d == 0.0 ? string(max_d) : string("1e",
                                                       floor(log(10, max_d)))
 
         push!(subplots,
-              histogram(Array(subset[1][:D]), labels = "Designs",
+              histogram(Array(subset[:D]), labels = "Designs",
                         normalize = :probability,
-                        title  = string("D-Optimality for ", subset[2]),
+                        title  = string("D-Optimality for ", subset[:Length][1],
+                                        " Experiments, ", size(subset, 1),
+                                        " Samples and ", factor_title, " Factors"),
                         xticks = ([0, max_d, global_max_d],
                                   ["0", max_x, global_max_x]),
                         xlims = (0.0, global_max_d),
                         color  = :lightblue),
-              histogram(Array(subset[1][:DELB]), labels = "Designs",
+              histogram(Array(subset[:DELB]), labels = "Designs",
                         normalize = :probability,
-                        title = string("D-Efficiency for ", subset[2]),
+                        title = string("D-Efficiency for ", subset[:Length][1],
+                                        " Experiments, ", size(subset, 1),
+                                        " Samples and ", factor_title, " Factors"),
                         xlims = (0.0, 1.0),
                         color = :lightgreen))
     end
 
-    plot(subplots..., legend = false, layout = (length(sampled_subsets), 2))
+    plot(subplots..., legend = false,
+         layout = (length(sampled_subsets), 2))
 end

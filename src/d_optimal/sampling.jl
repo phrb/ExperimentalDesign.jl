@@ -197,24 +197,13 @@ function sample_subsets(factors::Array{OrderedDict{Symbol, Any}, 1},
     sampled_subsets = []
 
     for subset = 1:length(ranges)
-        label = " "
-
-        if ranges[subset].start == ranges[subset].stop
-            label = string(ranges[subset].start, " Experiments")
-        else
-            label = string(ranges[subset].start, " to ",
-                          ranges[subset].stop, " Experiments")
-        end
-
-        label = string(label, ", ", length(keys(factors[subset])), " Factors")
-
         sampled_subset = sample_subset(factors[subset],
                                        ranges[subset],
                                        designs,
                                        check_bounds = check_bounds,
                                        scale = scale)
 
-        push!(sampled_subsets, (sampled_subset, label))
+        push!(sampled_subsets, sampled_subset)
     end
 
     return sampled_subsets
