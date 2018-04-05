@@ -351,13 +351,12 @@ function generate_model_matrix(formula::Formula,
     variables = get_model_variables(formula)
 
     # We are assuming a linear formula, a non-linear formula would mess scaling
-    design  = hcat(ones(size(design, 1)), design)
-    factors = OrderedDict(vcat(Pair(:I, [-1., 1.]), [f for f in factors]))
-    design  = DataFrame(scale(design, collect(values(factors))))
+    design = DataFrame(scale(design, collect(values(factors))))
 
     rename!(design, OrderedDict(zip(names(design), keys(factors))))
 
-    new_design = DataFrame(I = design[:I])
+    new_design = DataFrame(I = ones(size(design, 1)))
+    factors    = OrderedDict(vcat(Pair(:I, [1.]), [f for f in factors]))
 
     for variable in variables
         if typeof(variable) == Expr && variable.args[1] == :&

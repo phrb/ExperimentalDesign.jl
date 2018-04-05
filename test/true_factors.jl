@@ -1,8 +1,5 @@
 using ExperimentalDesign, DataStructures
 
-factors = 10
-
-#ranges = [k:k for k = ((2 * factors) + 1):1:((2 * factors) + 5)]
 ranges = [k:k for k = 20:1:24]
 
 factors = OrderedDict{Symbol, Any}()
