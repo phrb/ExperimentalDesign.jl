@@ -341,35 +341,21 @@ julia> m = generate_model_matrix(@formula(y ~ f1 + f2 + f3), float(A), factors)
 ```
 """
 function generate_model_matrix(formula::Formula,
-                               design::Array{T, 2},
-                               factors::OrderedDict;
-                               scale::Function = scale_boxdraper_encoding!) where T <: Any
-    design    = Array{Float64, 2}(expand_design(design, factors))
+                               design::DataFrame,
+                               factors::Dict;
+                               scale::Function = scale_boxdraper_encoding!)
+    contrasts = []
 
-    factors   = expand_factors(factors)
-    formula   = build_linear_formula(collect(keys(factors)))
-    variables = get_model_variables(formula)
-
-    # We are assuming a linear formula, a non-linear formula would mess scaling
-    design = DataFrame(scale(design, collect(values(factors))))
-
-    rename!(design, OrderedDict(zip(names(design), keys(factors))))
-
-    new_design = DataFrame(I = ones(size(design, 1)))
-    factors    = OrderedDict(vcat(Pair(:I, [1.]), [f for f in factors]))
-
-    for variable in variables
-        if typeof(variable) == Expr && variable.args[1] == :&
-            interaction             = Symbol(variable.args[2:end]...)
-            new_design[interaction] = ones(size(design, 1))
-
-            for s in variable.args[2:end]
-                new_design[interaction] .*= design[s]
-            end
-        else
-            new_design[variable] = design[variable]
+    for factor in keys(factors)
+        if !(eltype(factors[factor]) <: Real)
+            push!(contrasts,
+                  (factor, ContrastsMatrix(DummyCoding(), factors[factor])))
         end
     end
 
-    return Array(new_design[collect(keys(factors))])
+    design[:y] = ones(size(design, 1))
+
+    model_frame = ModelFrame(formula, design, contrasts = Dict(contrasts))
+
+    return ModelMatrix(model_frame).m
 end

@@ -14,7 +14,12 @@ import DataFrames: DataFrame,
                    rename!
 
 import StatsModels: Formula,
-                    Terms
+                    Terms,
+                    ModelFrame,
+                    ModelMatrix,
+                    ContrastsMatrix,
+                    DummyCoding
+
 
 # Plackett-Burman Designs
 
