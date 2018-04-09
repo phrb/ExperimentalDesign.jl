@@ -12,18 +12,21 @@ function check_repeated_row(subset::Array{T, 2}, row::Array{T, 1}) where T <: An
     return false
 end
 
-function full_factorial_subset(factors::Array{T, 1}, experiments::Int) where T <: Any
-    subset = fill!(Array{Any, 2}(experiments, size(factors, 1)), 0.0)
+function full_factorial_subset(factors::OrderedDict, experiments::Int)
+    subset = fill!(Array{Any, 2}(experiments, length(keys(factors))), 0.0)
 
     for i = 1:experiments
-        sample_row = sample_full_factorial(factors)
+        sample_row = sample_full_factorial(collect(values(factors)))
 
         while check_repeated_row(subset, sample_row)
-            sample_row = sample_full_factorial(factors)
+            sample_row = sample_full_factorial(collect(values(factors)))
         end
 
         subset[i, :] = sample_row
     end
+
+    subset = DataFrame(subset)
+    rename!(subset, zip(names(subset), collect(keys(factors))))
 
     return subset
 end
@@ -93,7 +96,7 @@ function evaluate_all_metrics(factors::OrderedDict,
 
     for i in 1:designs
         samples   = rand(sample_range)
-        subset    = full_factorial_subset(collect(values(factors)), samples)
+        subset    = full_factorial_subset(factors, samples)
         candidate = generate_model_matrix(formula, subset, factors,
                                           scale = scale)
 
@@ -127,7 +130,7 @@ function evaluate_metrics(factors::OrderedDict,
 
     for i in 1:designs
         samples   = rand(sample_range)
-        subset    = full_factorial_subset(collect(values(factors)), samples)
+        subset    = full_factorial_subset(factors, samples)
         candidate = generate_model_matrix(formula, subset, factors,
                                           scale = scale)
 
