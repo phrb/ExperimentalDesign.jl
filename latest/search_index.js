@@ -33,7 +33,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#ExperimentalDesign.generate_model_matrix-Tuple{StatsModels.Formula,DataFrames.DataFrame,Dict}",
+    "location": "index.html#ExperimentalDesign.generate_model_matrix-Tuple{StatsModels.Formula,DataFrames.DataFrame,DataStructures.OrderedDict}",
     "page": "ExperimentalDesign.jl Documentation",
     "title": "ExperimentalDesign.generate_model_matrix",
     "category": "method",
