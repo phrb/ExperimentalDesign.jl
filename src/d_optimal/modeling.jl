@@ -341,9 +341,10 @@ julia> m = generate_model_matrix(@formula(y ~ f1 + f2 + f3), float(A), factors)
 ```
 """
 function generate_model_matrix(formula::Formula,
-                               design::DataFrame,
+                               input_design::DataFrame,
                                factors::OrderedDict;
                                scale::Function = scale_boxdraper_encoding!)
+    design = deepcopy(input_design)
     contrasts = []
 
     for factor in keys(factors)

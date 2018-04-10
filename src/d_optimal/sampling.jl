@@ -28,6 +28,12 @@ function full_factorial_subset(factors::OrderedDict, experiments::Int)
     subset = DataFrame(subset)
     rename!(subset, zip(names(subset), collect(keys(factors))))
 
+    for factor in keys(factors)
+        if eltype(subset[factor]) != eltype(factors[factor])
+            subset[factor] = convert(Array{eltype(factors[factor]), 1}, subset[factor])
+        end
+    end
+
     return subset
 end
 
@@ -57,18 +63,18 @@ function enforce_bounds(factors::OrderedDict,
             if designs > restricted_subsets
                 println("> Requested too many designs, using ",
                         restricted_subsets, " instead")
-                designs = restricted_subsets
+                designs = floor(Int, restricted_subsets)
             end
         elseif designs > full_factorial_subsets
             println("> Requested too many designs, using ",
                     full_factorial_subsets, " instead")
-            designs = full_factorial_subsets
+            designs = floor(Int, full_factorial_subsets)
         end
 
         if sample_range.stop > full_factorial_size
             println("> Requested too many maximum experiments, using ",
                     full_factorial_size, " instead")
-            sample_range = sample_range.start:full_factorial_size
+            sample_range = sample_range.start:floor(Int, full_factorial_size)
         end
     else
         println("> WARNING: Skipping bounds check!")
