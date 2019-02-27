@@ -1,4 +1,4 @@
-using LinearAlgebra, DataFrames, StatsModels, Random, BenchmarkTools
+using Logging, LinearAlgebra, DataFrames, StatsModels, Random, BenchmarkTools
 
 function d_criterion(model_matrix::Array{Float64, 2})
     det((model_matrix' * model_matrix) / size(model_matrix, 1)) ^ (1 / size(model_matrix, 2))
@@ -11,105 +11,6 @@ function linear_model(data::DataFrame)
     @eval @formula(_ ~ 0 + $linear_formula)
 end
 
-function unoptimized_compute_variance_prediction!(dispersion_matrix::Array{Float64, 2},
-                                                  model_matrix::Array{Float64, 2},
-                                                  candidate_set::Array{Float64, 2},
-                                                  design_variance::Array{Float64, 1},
-                                                  candidate_variance::Array{Float64, 1},
-                                                  predictions::Array{Float64, 2},
-                                                  deltas::Array{Float64, 2})
-    for i = 1:size(model_matrix, 1)
-        design_variance[i] = model_matrix[i, :]' * dispersion_matrix * model_matrix[i, :]
-    end
-
-    for i = 1:size(candidate_set, 1)
-        candidate_variance[i] = candidate_set[i, :]' * dispersion_matrix * candidate_set[i, :]
-    end
-
-    for i = 1:size(predictions, 1)
-        for j = 1:size(predictions, 2)
-            predictions[i, j] = model_matrix[i, :]' * dispersion_matrix * candidate_set[j, :]
-        end
-    end
-
-    for i = 1:size(deltas, 1)
-        for j = 1:size(deltas, 2)
-            deltas[i, j] = candidate_variance[j] -
-                (design_variance[i] * candidate_variance[j] -
-                 (predictions[i, j] * predictions[i, j])) -
-                 design_variance[i]
-        end
-    end
-
-    return (design_variance, candidate_variance, predictions, deltas)
-end
-
-function inbounds_compute_variance_prediction!(dispersion_matrix::Array{Float64, 2},
-                                               model_matrix::Array{Float64, 2},
-                                               candidate_set::Array{Float64, 2},
-                                               design_variance::Array{Float64, 1},
-                                               candidate_variance::Array{Float64, 1},
-                                               predictions::Array{Float64, 2},
-                                               deltas::Array{Float64, 2})
-    @inbounds for i = 1:size(model_matrix, 1)
-        design_variance[i] = model_matrix[i, :]' * dispersion_matrix * model_matrix[i, :]
-    end
-
-    @inbounds for i = 1:size(candidate_set, 1)
-        candidate_variance[i] = candidate_set[i, :]' * dispersion_matrix * candidate_set[i, :]
-    end
-
-    @inbounds for i = 1:size(predictions, 1)
-        @inbounds for j = 1:size(predictions, 2)
-            predictions[i, j] = model_matrix[i, :]' * dispersion_matrix * candidate_set[j, :]
-        end
-    end
-
-    @inbounds for i = 1:size(deltas, 1)
-        @inbounds for j = 1:size(deltas, 2)
-            deltas[i, j] = candidate_variance[j] -
-                (design_variance[i] * candidate_variance[j] -
-                 (predictions[i, j] * predictions[i, j])) -
-                 design_variance[i]
-        end
-    end
-
-    return (design_variance, candidate_variance, predictions, deltas)
-end
-
-function inbounds_simd_compute_variance_prediction!(dispersion_matrix::Array{Float64, 2},
-                                                    model_matrix::Array{Float64, 2},
-                                                    candidate_set::Array{Float64, 2},
-                                                    design_variance::Array{Float64, 1},
-                                                    candidate_variance::Array{Float64, 1},
-                                                    predictions::Array{Float64, 2},
-                                                    deltas::Array{Float64, 2})
-    @inbounds @simd for i = 1:size(model_matrix, 1)
-        design_variance[i] = model_matrix[i, :]' * dispersion_matrix * model_matrix[i, :]
-    end
-
-    @inbounds @simd for i = 1:size(candidate_set, 1)
-        candidate_variance[i] = candidate_set[i, :]' * dispersion_matrix * candidate_set[i, :]
-    end
-
-    @inbounds @simd for i = 1:size(predictions, 1)
-        @inbounds @simd for j = 1:size(predictions, 2)
-            predictions[i, j] = model_matrix[i, :]' * dispersion_matrix * candidate_set[j, :]
-        end
-    end
-
-    @inbounds @simd for i = 1:size(deltas, 1)
-        @inbounds @simd for j = 1:size(deltas, 2)
-            deltas[i, j] = candidate_variance[j] -
-                (design_variance[i] * candidate_variance[j] -
-                 (predictions[i, j] * predictions[i, j])) -
-                 design_variance[i]
-        end
-    end
-
-    return (design_variance, candidate_variance, predictions, deltas)
-end
-
 function compute_variance_prediction!(dispersion_matrix::Array{Float64, 2},
                                       model_matrix::Array{Float64, 2},
                                       candidate_set::Array{Float64, 2},
@@ -117,21 +18,21 @@ function compute_variance_prediction!(dispersion_matrix::Array{Float64, 2},
                                       candidate_variance::Array{Float64, 1},
                                       predictions::Array{Float64, 2},
                                       deltas::Array{Float64, 2})
-    Threads.@threads for i = 1:size(model_matrix, 1)
+    @inbounds Threads.@threads for i = 1:size(model_matrix, 1)
         design_variance[i] = model_matrix[i, :]' * dispersion_matrix * model_matrix[i, :]
     end
 
-    Threads.@threads for i = 1:size(candidate_set, 1)
+    @inbounds Threads.@threads for i = 1:size(candidate_set, 1)
         candidate_variance[i] = candidate_set[i, :]' * dispersion_matrix * candidate_set[i, :]
     end
 
-    Threads.@threads for i = 1:size(predictions, 1)
+    @inbounds Threads.@threads for i = 1:size(predictions, 1)
         @inbounds for j = 1:size(predictions, 2)
             predictions[i, j] = model_matrix[i, :]' * dispersion_matrix * candidate_set[j, :]
         end
     end
 
-    Threads.@threads for i = 1:size(deltas, 1)
+    @inbounds Threads.@threads for i = 1:size(deltas, 1)
         @inbounds for j = 1:size(deltas, 2)
             deltas[i, j] = candidate_variance[j] -
                 (design_variance[i] * candidate_variance[j] -
@@ -173,13 +74,13 @@ function variance_prediction!(formula::Formula,
 
     dispersion_matrix = inv(clean_model_matrix' * clean_model_matrix)
 
-    @btime $compute_function($dispersion_matrix,
-                             $clean_model_matrix,
-                             $clean_candidate_model_matrix,
-                             $design_variance,
-                             $candidate_variance,
-                             $predictions,
-                             $deltas) samples = 5 seconds = 60 gcsample = true
+    compute_function(dispersion_matrix,
+                     clean_model_matrix,
+                     clean_candidate_model_matrix,
+                     design_variance,
+                     candidate_variance,
+                     predictions,
+                     deltas)
 end
 
 function run_variance_prediction!(;compute_function::Function = compute_variance_prediction!)
@@ -210,14 +111,6 @@ function run_variance_prediction!(;compute_function::Function = compute_variance
                          candidate_set,
                          compute_function)
     result
-end
-
-function measure_variance_prediction_implementations()
-    println(Threads.nthreads())
-    result_1 = run_variance_prediction!(compute_function = unoptimized_compute_variance_prediction!)
-    result_2 = run_variance_prediction!(compute_function = inbounds_compute_variance_prediction!)
-    result_3 = run_variance_prediction!(compute_function = inbounds_simd_compute_variance_prediction!)
-    result_4 = run_variance_prediction!(compute_function = compute_variance_prediction!)
 end
 
 function random_design(factors::Int, size::Int)
@@ -267,7 +160,41 @@ function optimize_random_starting_design(;factors::Int,
                      (size(clean_model_matrix, 1),
                       size(clean_candidate_model_matrix, 1)))
 
+    dispersion_matrix = inv(clean_model_matrix' * clean_model_matrix)
+
+    compute_variance_prediction!(dispersion_matrix,
+                                 clean_model_matrix,
+                                 clean_candidate_model_matrix,
+                                 design_variance,
+                                 candidate_variance,
+                                 predictions,
+                                 deltas)
+
+    current_d_criterion = d_criterion(clean_model_matrix)
+    @info "Starting D-Criterion" current_d_criterion
+
     for i in 1:iterations
+        best_swap = findmax(deltas)
+        @debug "Best Swap" best_swap
+
+        if best_swap[1] <= 0.0
+            @debug "Max. delta was less than, or equal to, zero"
+
+            if refresh_candidate_set
+                @info "Regenerating candidate set..." i
+
+                candidate_set = random_design(factors, candidate_set_size)
+                formula = linear_model(candidate_set)
+                candidate_model_matrix = ModelMatrix(ModelFrame(formula, candidate_set))
+                clean_candidate_model_matrix = remove_response(design, candidate_model_matrix)
+            else
+                @info "Stopping..."
+                break
+            end
+        else
+            clean_model_matrix[best_swap[2][1], :] = clean_candidate_model_matrix[best_swap[2][2], :]
+        end
+
         dispersion_matrix = inv(clean_model_matrix' * clean_model_matrix)
 
         compute_variance_prediction!(dispersion_matrix,
@@ -277,34 +204,10 @@ function optimize_random_starting_design(;factors::Int,
                                      candidate_variance,
                                      predictions,
                                      deltas)
-
-        current_d_criterion = d_criterion(clean_model_matrix)
-        println("D-Criterion before swap: $current_d_criterion")
-
-        best_swap = findmax(deltas)
-        println(best_swap)
-
-        if best_swap[1] <= 0.0
-            println("Max. delta was less than, or equal to, zero")
-
-            if refresh_candidate_set
-                println("Regenerating candidate set...")
-
-                candidate_set = random_design(factors, candidate_set_size)
-                formula = linear_model(candidate_set)
-                candidate_model_matrix = ModelMatrix(ModelFrame(formula, candidate_set))
-                clean_candidate_model_matrix = remove_response(design, candidate_model_matrix)
-            else
-                println("Stopping...")
-                break
-            end
-        else
-            clean_model_matrix[best_swap[2][1], :] = clean_candidate_model_matrix[best_swap[2][2], :]
-
-            current_d_criterion = d_criterion(clean_model_matrix)
-            println("D-Criterion after swap: $current_d_criterion")
-        end
     end
+
+    current_d_criterion = d_criterion(clean_model_matrix)
+    @info "Final D-Criterion" current_d_criterion
 
     clean_model_matrix
 end
@@ -315,8 +218,8 @@ function measure_optimize_random_starting_design(refresh_candidate_set)
 
     factors = 4
     experiments = 12
-    candidate_set_size = 1000
-    iterations = 200
+    candidate_set_size = 500
+    iterations = 5
 
     optimized_design = optimize_random_starting_design(factors = factors,
                                                        experiments = experiments,
