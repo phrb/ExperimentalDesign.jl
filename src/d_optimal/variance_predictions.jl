@@ -1,4 +1,4 @@
-using Logging, LinearAlgebra, DataFrames, StatsModels, Random, BenchmarkTools
+using Logging, LinearAlgebra, RCall, DataFrames, StatsModels, Random, BenchmarkTools
 
 function d_criterion(model_matrix::Array{Float64, 2})
     det((model_matrix' * model_matrix) / size(model_matrix, 1)) ^ (1 / size(model_matrix, 2))
@@ -7,17 +7,17 @@ end
 function linear_model(data::DataFrame)
     linear_formula = Expr(:call)
     linear_formula.args = vcat(:+, names(data))
-    #@eval @formula(_ ~ 1 + $linear_formula)
-    @eval @formula(_ ~ 0 + $linear_formula)
+    #@eval @formula(_ ~ 0 + $linear_formula)
+    @eval @formula(_ ~ $linear_formula)
 end
 
-function compute_variance_prediction!(dispersion_matrix::Array{Float64, 2},
-                                      model_matrix::Array{Float64, 2},
-                                      candidate_set::Array{Float64, 2},
-                                      design_variance::Array{Float64, 1},
-                                      candidate_variance::Array{Float64, 1},
-                                      predictions::Array{Float64, 2},
-                                      deltas::Array{Float64, 2})
+function variance_prediction!(dispersion_matrix::Array{Float64, 2},
+                              model_matrix::Array{Float64, 2},
+                              candidate_set::Array{Float64, 2},
+                              design_variance::Array{Float64, 1},
+                              candidate_variance::Array{Float64, 1},
+                              predictions::Array{Float64, 2},
+                              deltas::Array{Float64, 2})
     @inbounds Threads.@threads for i = 1:size(model_matrix, 1)
         design_variance[i] = model_matrix[i, :]' * dispersion_matrix * model_matrix[i, :]
     end
@@ -34,83 +34,13 @@ function compute_variance_prediction!(dispersion_matrix::Array{Float64, 2},
 
     @inbounds Threads.@threads for i = 1:size(deltas, 1)
         @inbounds for j = 1:size(deltas, 2)
-            deltas[i, j] = candidate_variance[j] -
-                (design_variance[i] * candidate_variance[j] -
-                 (predictions[i, j] * predictions[i, j])) -
-                 design_variance[i]
+            deltas[i, j] = candidate_variance[j] - design_variance[i] -
+                           ((design_variance[i] * candidate_variance[j]) -
+                            (predictions[i, j] * predictions[i, j]))
         end
     end
 
-    return (design_variance, candidate_variance, predictions, deltas)
-end
-
-function variance_prediction!(formula::Formula,
-                              design::DataFrame,
-                              candidate_set::DataFrame,
-                              compute_function::Function = compute_variance_prediction!)
-    model_matrix = ModelMatrix(ModelFrame(formula, design))
-    candidate_model_matrix = ModelMatrix(ModelFrame(formula, candidate_set))
-
-    response_index = findfirst(x -> x == :_, names(design))
-    removed_column = findfirst(x -> x == response_index, model_matrix.assign)
-
-    clean_columns = trues(size(model_matrix.m, 2))
-    clean_columns[removed_column] = false
-
-    clean_model_matrix = model_matrix.m[:, clean_columns]
-    clean_candidate_model_matrix = candidate_model_matrix.m[:, clean_columns]
-
-
-    design_variance = similar(clean_model_matrix[:, 1])
-    candidate_variance = similar(clean_candidate_model_matrix[:, 1])
-
-    predictions = similar(clean_candidate_model_matrix[:, 1],
-                          (size(clean_model_matrix, 1),
-                           size(clean_candidate_model_matrix, 1)))
-
-    deltas = similar(clean_candidate_model_matrix[:, 1],
-                     (size(clean_model_matrix, 1),
-                      size(clean_candidate_model_matrix, 1)))
-
-    dispersion_matrix = inv(clean_model_matrix' * clean_model_matrix)
-
-    compute_function(dispersion_matrix,
-                     clean_model_matrix,
-                     clean_candidate_model_matrix,
-                     design_variance,
-                     candidate_variance,
-                     predictions,
-                     deltas)
-end
-
-function run_variance_prediction!(;compute_function::Function = compute_variance_prediction!)
-    Random.seed!(1234)
-
-    factors = 10
-    experiments = 20
-    candidate_set_size = 8000
-
-    data = Dict("_" => ones(experiments))
-
-    for i in 1:factors
-        data["X$i"] = rand(experiments)
-    end
-
-    design = DataFrame(data)
-
-    data = Dict("_" => ones(candidate_set_size))
-
-    for i in 1:factors
-        data["X$i"] = rand(candidate_set_size)
-    end
-
-    candidate_set = DataFrame(data)
-
-    variance_prediction!(linear_model(design),
-                         design,
-                         candidate_set,
-                         compute_function)
-    result
+    return
 end
 
 function random_design(factors::Int, size::Int)
@@ -162,13 +92,13 @@ function optimize_random_starting_design(;factors::Int,
 
     dispersion_matrix = inv(clean_model_matrix' * clean_model_matrix)
 
-    compute_variance_prediction!(dispersion_matrix,
-                                 clean_model_matrix,
-                                 clean_candidate_model_matrix,
-                                 design_variance,
-                                 candidate_variance,
-                                 predictions,
-                                 deltas)
+    variance_prediction!(dispersion_matrix,
+                         clean_model_matrix,
+                         clean_candidate_model_matrix,
+                         design_variance,
+                         candidate_variance,
+                         predictions,
+                         deltas)
 
     current_d_criterion = d_criterion(clean_model_matrix)
     @info "Starting D-Criterion" current_d_criterion
@@ -197,13 +127,13 @@ function optimize_random_starting_design(;factors::Int,
 
         dispersion_matrix = inv(clean_model_matrix' * clean_model_matrix)
 
-        compute_variance_prediction!(dispersion_matrix,
-                                     clean_model_matrix,
-                                     clean_candidate_model_matrix,
-                                     design_variance,
-                                     candidate_variance,
-                                     predictions,
-                                     deltas)
+        variance_prediction!(dispersion_matrix,
+                             clean_model_matrix,
+                             clean_candidate_model_matrix,
+                             design_variance,
+                             candidate_variance,
+                             predictions,
+                             deltas)
     end
 
     current_d_criterion = d_criterion(clean_model_matrix)
@@ -213,13 +143,13 @@ function optimize_random_starting_design(;factors::Int,
 end
 
 function measure_optimize_random_starting_design(refresh_candidate_set)
-    #Random.seed!(1234)
-    Random.seed!()
+    Random.seed!(1234)
+    #Random.seed!()
 
     factors = 4
     experiments = 12
-    candidate_set_size = 500
-    iterations = 5
+    candidate_set_size = 1000
+    iterations = 40
 
     optimized_design = optimize_random_starting_design(factors = factors,
                                                        experiments = experiments,
