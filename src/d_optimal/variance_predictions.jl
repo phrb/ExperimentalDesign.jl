@@ -1,21 +1,21 @@
-using Logging, LinearAlgebra, DataFrames, StatsModels, Random, BenchmarkTools
+using Logging, LinearAlgebra, DataFrames, StatsModels, Random
 
+"""
+$(TYPEDSIGNATURES)
+"""
 function d_criterion(model_matrix::Array{Float64, 2})
     det((model_matrix' * model_matrix) / size(model_matrix, 1)) ^ (1 / size(model_matrix, 2))
 end
 
+"""
+$(TYPEDSIGNATURES)
+"""
 function linear_model(data::DataFrame)
     Term(:_) ~ sum(term.(names(data)))
 end
 
 """
-function variance_prediction!(dispersion_matrix::Array{Float64, 2},
-                              model_matrix::Array{Float64, 2},
-                              candidate_set::Array{Float64, 2},
-                              design_variance::Array{Float64, 1},
-                              candidate_variance::Array{Float64, 1},
-                              predictions::Array{Float64, 2},
-                              deltas::Array{Float64, 2})
+$(TYPEDSIGNATURES)
 
 Computes `deltas` for  the exchanges between all pairs  made between experiments
 in `model_matrix`  and experiments in `candidate_set`.   The `dispersion_matrix`
@@ -57,7 +57,7 @@ function variance_prediction!(dispersion_matrix::Array{Float64, 2},
 end
 
 """
-function random_design(factors::Int, size::Int)
+$(TYPEDSIGNATURES)
 
 Generates a random design of size `size` with `factors` numerical factors.
 """
@@ -72,7 +72,7 @@ function random_design(factors::Int, size::Int)
 end
 
 """
-function expanded_design(factors::Int, levels::Int)
+$(TYPEDSIGNATURES)
 
 Generates  a design  from all  combinations  of `factors`  factors and  `levels`
 levels.
@@ -89,7 +89,7 @@ function expanded_design(factors::Int, levels::Int)
 end
 
 """
-function expand_grid(factors::Int, levels::Int)
+$(TYPEDSIGNATURES)
 
 Generates all combinations of `factors` factors with `levels` levels.
 """
@@ -107,13 +107,17 @@ function expand_grid(factors::Int, levels::Int)
     complete_set
 end
 
-function optimize_random_starting_design(;factors::Int,
-                                         experiments::Int,
-                                         candidate_set_size::Int,
-                                         iterations::Int,
-                                         refresh_candidate_set::Bool = true)
-    design = random_design(factors, experiments)
-    candidate_set = random_design(factors, candidate_set_size)
+"""
+$(TYPEDSIGNATURES)
+"""
+function optimize_design(;factors::Int,
+                         levels::Int,
+                         experiments::Int,
+                         design::DataFrame,
+                         candidate_set::DataFrame,
+                         iterations::Int,
+                         refresh_candidate_set::Bool = true)
+    candidate_set_size = size(candidate_set, 1)
 
     formula = linear_model(design)
 
@@ -145,7 +149,7 @@ function optimize_random_starting_design(;factors::Int,
                          deltas)
 
     current_d_criterion = d_criterion(model_matrix)
-    @info "Starting D-Criterion" current_d_criterion
+    @debug "Starting D-Criterion" current_d_criterion
 
     for i in 1:iterations
         best_swap = findmax(deltas)
@@ -155,7 +159,7 @@ function optimize_random_starting_design(;factors::Int,
             @debug "Max. delta was less than, or equal to, zero"
 
             if refresh_candidate_set
-                @info "Regenerating candidate set..." i
+                @debug "Regenerating candidate set..." i
 
                 candidate_set = random_design(factors, candidate_set_size)
 
@@ -166,7 +170,7 @@ function optimize_random_starting_design(;factors::Int,
 
                 dummy_reponse, candidate_model_matrix = modelcols(schema_formula, candidate_set)
             else
-                @info "Stopping..."
+                @debug "Stopping..."
                 break
             end
         else
@@ -185,114 +189,60 @@ function optimize_random_starting_design(;factors::Int,
     end
 
     current_d_criterion = d_criterion(model_matrix)
-    @info "Final D-Criterion" current_d_criterion
+    @debug "Final D-Criterion" current_d_criterion
 
     model_matrix
 end
 
-function optimize_expanded_random_starting_design(;factors::Int,
-                                                  levels::Int,
-                                                  experiments::Int,
-                                                  iterations::Int)
+"""
+$(TYPEDSIGNATURES)
+"""
+function measure_optimize_design_refresh(refresh_candidate_set)
+    factors = 4
+    levels = 2
+    experiments = 12
+    candidate_set_size = 1000
+    iterations = 40
+
+    design = random_design(factors, experiments)
+    candidate_set = random_design(factors, candidate_set_size)
+
+    optimized_design = optimize_design(factors = factors,
+                                       levels = levels,
+                                       experiments = experiments,
+                                       design = design,
+                                       candidate_set = candidate_set,
+                                       iterations = iterations,
+                                       refresh_candidate_set = refresh_candidate_set)
+end
+
+"""
+$(TYPEDSIGNATURES)
+"""
+function measure_optimize_design(levels)
+    factors = 4
+    experiments = 6
+    iterations = 40
+    refresh_candidate_set = false
+
     candidate_set = expanded_design(factors, levels)
     removed_indices = randperm(levels ^ factors)[1:experiments]
 
     design = candidate_set[removed_indices, :]
     candidate_set = candidate_set[[i for i in 1:(levels ^ factors) if !(i in removed_indices)], :]
 
-    formula = linear_model(design)
-
-    new_schema = schema(formula, design)
-    schema_formula = apply_schema(formula, new_schema)
-
-    dummy_response, model_matrix = modelcols(schema_formula, design)
-    dummy_reponse, candidate_model_matrix = modelcols(schema_formula, candidate_set)
-
-    design_variance = similar(model_matrix[:, 1])
-    candidate_variance = similar(candidate_model_matrix[:, 1])
-
-    predictions = similar(candidate_model_matrix[:, 1],
-                          (size(model_matrix, 1),
-                           size(candidate_model_matrix, 1)))
-
-    deltas = similar(candidate_model_matrix[:, 1],
-                     (size(model_matrix, 1),
-                      size(candidate_model_matrix, 1)))
-
-    dispersion_matrix = inv(model_matrix' * model_matrix)
-
-    variance_prediction!(dispersion_matrix,
-                         model_matrix,
-                         candidate_model_matrix,
-                         design_variance,
-                         candidate_variance,
-                         predictions,
-                         deltas)
-
-    current_d_criterion = d_criterion(model_matrix)
-    @info "Starting D-Criterion" current_d_criterion
-
-    for i in 1:iterations
-        best_swap = findmax(deltas)
-        @info "Best Swap" best_swap
-
-        if best_swap[1] <= 0.0
-            @info "Max. delta was less than, or equal to, zero"
-
-            @info "Stopping..."
-            break
-        else
-            model_matrix[best_swap[2][1], :] = candidate_model_matrix[best_swap[2][2], :]
-        end
-
-        dispersion_matrix = inv(model_matrix' * model_matrix)
-
-        variance_prediction!(dispersion_matrix,
-                             model_matrix,
-                             candidate_model_matrix,
-                             design_variance,
-                             candidate_variance,
-                             predictions,
-                             deltas)
-    end
-
-    current_d_criterion = d_criterion(model_matrix)
-    @info "Final D-Criterion" current_d_criterion
-
-    model_matrix
+    optimized_design = optimize_design(factors = factors,
+                                       levels = levels,
+                                       experiments = experiments,
+                                       design = design,
+                                       candidate_set = candidate_set,
+                                       iterations = iterations,
+                                       refresh_candidate_set = refresh_candidate_set)
 end
 
-function measure_optimize_random_starting_design(refresh_candidate_set)
-    Random.seed!(1234)
-    #Random.seed!()
+seed = 403
+Random.seed!(seed)
 
-    factors = 4
-    experiments = 12
-    candidate_set_size = 1000
-    iterations = 40
-
-    optimized_design = optimize_random_starting_design(factors = factors,
-                                                       experiments = experiments,
-                                                       candidate_set_size = candidate_set_size,
-                                                       iterations = iterations,
-                                                       refresh_candidate_set = refresh_candidate_set)
-end
-
-function measure_optimize_random_starting_design(levels)
-    #Random.seed!(1234)
-    Random.seed!()
-
-    factors = 4
-    experiments = 6
-    candidate_set_size = 1000
-    iterations = 40
-
-    optimized_design = optimize_expanded_random_starting_design(factors = factors,
-                                                                levels = levels,
-                                                                experiments = experiments,
-                                                                iterations = iterations)
-end
-
-#design = measure_optimize_random_starting_design(false)
-#design_refresh = measure_optimize_random_starting_design(true)
-design_expanded = measure_optimize_random_starting_design(2)
+design = measure_optimize_design_refresh(false)
+design_refresh = measure_optimize_design_refresh(true)
+design_expanded = measure_optimize_design(2)

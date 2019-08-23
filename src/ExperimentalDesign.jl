@@ -2,62 +2,24 @@
 
 module ExperimentalDesign
 
-using StatPlots
-
-import StatsBase: counts
-
-import Primes: primes
-
-import DataStructures: OrderedDict
-
-import DataFrames: DataFrame,
-                   rename!
-
-import StatsModels: Formula,
-                    Terms,
-                    ModelFrame,
-                    ModelMatrix,
-                    ContrastsMatrix,
-                    DummyCoding
-
+using Random
+using Logging
+using Primes
+using DataFrames
+using StatsModels
+using DocStringExtensions
+using LinearAlgebra
 
 # Plackett-Burman Designs
 
-export plackett_burman,
-       is_plackett_burman,
-       paley
+export plackettburman, isplackettburman, paley
 
 # D-Optimal Designs
 
-export plot_subsets,
-       sample_subsets,
-       sample_subset,
-       full_factorial_subset,
-       get_expanded_values,
-       expand_design,
-       expand_factors,
-       generate_designs
+export optimize_design, expanded_design, random_design, d_criterion
 
-export scale_orthogonal!,
-       scale_boxdraper_encoding!,
-       generate_model_matrix,
-       get_prediction_variances,
-       build_linear_formula,
-       get_model_variables
-
-export condition_number,
-       d_optimality,
-       a_optimality,
-       v_optimality,
-       g_optimality,
-       g_efficiency,
-       d_efficiency_lower_bound,
-       d_efficiency_lower_bound_algdesign
-
-include("plackett_burman/plackett_burman.jl")
-include("d_optimal/modeling.jl")
-include("d_optimal/criteria.jl")
-include("d_optimal/sampling.jl")
-include("d_optimal/plotting.jl")
+include("design.jl")
+include("plackett_burman.jl")
+include("d_optimal/variance_predictions.jl")
 
 end

@@ -1,5 +1,10 @@
+using Test
 using ExperimentalDesign
-using Base.Test
 
-# write your own tests here
-@test 1 == 1
+tests = ["variance_predictions.jl"]
+
+@testset "ExperimentalDesign" begin
+    for test in tests
+        include(test)
+    end
+end
