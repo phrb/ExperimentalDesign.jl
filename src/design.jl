@@ -49,6 +49,13 @@ function PlackettBurman(factors::Tuple)
 end
 
 """
+$(TYPEDSIGNATURES)
+"""
+function PlackettBurman(factors::Int)
+    PlackettBurman(Tuple(Symbol("f" * string(i)) for i = 1:factors))
+end
+
+"""
 $(TYPEDEF)
 
 $(TYPEDFIELDS)
