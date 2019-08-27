@@ -10,13 +10,17 @@ using StatsModels
 using DocStringExtensions
 using LinearAlgebra
 
-# Plackett-Burman Designs
+# Types
 
-export plackettburman, isplackettburman, paley
+export AbstractDesign, AbstractScreeningDesign, AbstractFactorialDesign,
+    AbstractOptimalDesign, PlackettBurman, FullFactorial, FractionalFactorial,
+    Optimal
 
-# D-Optimal Designs
+# Methods
 
-export optimize_design, expanded_design, random_design, d_criterion
+export plackettburman, isplackettburman, paley,
+    optimize_design, expanded_design, random_design, d_criterion,
+    next_offset_divisible_prime
 
 include("design.jl")
 include("plackett_burman.jl")

@@ -1,9 +1,23 @@
 """
 $(TYPEDSIGNATURES)
 """
-function primes_divisible_offset(factor::Int,
-                                 offset::Int,
-                                 max_prime::Int)
+function next_offset_divisible_prime(n::Int, offset::Int, divisor::Int, tries::Int)
+    for i = 1:tries
+        prime = nextprime(n, i)
+
+        if (prime + offset) % divisor == 0
+            return prime
+        end
+    end
+
+    error("There are no primes from $n, within $tries tries, " *
+          "divisible by $divisor with offset $offset")
+end
+
+"""
+$(TYPEDSIGNATURES)
+"""
+function primes_divisible_offset(factor::Int, offset::Int, max_prime::Int)
     all_primes = primes(max_prime)
     selected_primes = Int[]
 
@@ -83,10 +97,7 @@ the closest, smallest, number for which it is possible.
 
 """
 function plackettburman(matrix_size::Int)
-    # Paley construction works for primes where `(p +  1) % 4 == 0` Therefore, we must
-    # use    `factor    =    4`    and    `offset   =    1`    in    the    call    to
-    # [`primes_divisible_offset`](@ref).
-    p = primes_divisible_offset(4, 1, matrix_size)[end]
+    p = next_offset_divisible_prime(matrix_size, 1, 4, 1000)
 
     A = Matrix{Int}(undef, p + 1, p)
     A[1, :] = ones(p)
