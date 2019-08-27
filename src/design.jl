@@ -33,11 +33,20 @@ end
 """
 $(TYPEDSIGNATURES)
 """
-function PlackettBurman(factors::Tuple)
-    symbol_factors = Symbol.(factors)
-    design = DataFrame(plackettburman(length(factors)))
-    dummy_factors = Tuple(Symbol("d" * string(i)) for i = 1:(length(names(design)) -
-                                                             length(symbol_factors)))
+function PlackettBurman(formula::FormulaTerm)
+    symbol_factors = Tuple(r.sym for r in formula.rhs)
+
+    initial_design = plackettburman(length(symbol_factors))
+    categorical_design = similar(initial_design, Symbol)
+
+    for i = 1:size(initial_design, 1), j = 1:size(initial_design, 2)
+        categorical_design[i, j] = initial_design[i, j] == 1.0 ? :high : :low
+    end
+
+    design = DataFrame(categorical_design)
+
+    dummy_factors = Tuple(Symbol("dummy" * string(i)) for i = 1:(length(names(design)) -
+                                                                 length(symbol_factors)))
 
     design_names = (symbol_factors..., dummy_factors...)
     names!(design, collect(design_names))
@@ -45,14 +54,14 @@ function PlackettBurman(factors::Tuple)
     PlackettBurman(design,
                    symbol_factors,
                    dummy_factors,
-                   term(:response) ~ sum(term.(design_names)))
+                   term(formula.lhs) ~ sum(term.(design_names)))
 end
 
 """
 $(TYPEDSIGNATURES)
 """
 function PlackettBurman(factors::Int)
-    PlackettBurman(Tuple(Symbol("f" * string(i)) for i = 1:factors))
+    PlackettBurman(term(:response) ~ sum(term.(Symbol("factor" * string(i)) for i = 1:factors)))
 end
 
 """
