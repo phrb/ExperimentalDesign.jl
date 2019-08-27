@@ -24,7 +24,7 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct PlackettBurman <: AbstractScreeningDesign
-    design_matrix::DataFrame
+    matrix::DataFrame
     factors::Tuple
     dummy_factors::Tuple
     formula::FormulaTerm
@@ -70,9 +70,31 @@ $(TYPEDEF)
 $(TYPEDFIELDS)
 """
 struct FullFactorial <: AbstractFactorialDesign
-    matrix::Array{Float64, 2}
-    response::Union{Array{Float64, 1}, Missing}
-    formula::Union{FormulaTerm, Missing}
+    matrix::Union{DataFrame, Missing}
+    iterator::Base.Iterators.ProductIterator
+    factors::NamedTuple
+    formula::FormulaTerm
+end
+
+"""
+$(TYPEDSIGNATURES)
+"""
+function FullFactorial(factors::NamedTuple, formula::FormulaTerm; explicit::Bool = false)
+    iterator = fullfactorial(values(factors))
+    matrix = missing
+
+    if explicit
+        matrix = DataFrame(explicit_fullfactorial(iterator))
+    end
+
+    FullFactorial(matrix, iterator, factors, formula)
+end
+
+"""
+$(TYPEDSIGNATURES)
+"""
+function FullFactorial(factors::NamedTuple; explicit::Bool = false)
+    FullFactorial(factors, term(:response) ~ sum(term.(keys(factors))), explicit = explicit)
 end
 
 """
