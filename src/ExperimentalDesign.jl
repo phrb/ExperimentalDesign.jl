@@ -2,7 +2,8 @@
 
 module ExperimentalDesign
 
-using Random using Logging
+using Random
+using Logging
 using Primes
 using DataFrames
 using StatsModels
