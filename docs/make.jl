@@ -1,5 +1,4 @@
-using Documenter
-using ExperimentalDesign
+using Documenter, ExperimentalDesign
 
 # The DOCSARGS environment variable can be used to pass additional arguments to make.jl.
 # This is useful on CI, if you need to change the behavior of the build slightly but you
@@ -9,6 +8,11 @@ if haskey(ENV, "DOCSARGS")
         push!(ARGS, arg)
     end
 end
+
+DocMeta.setdocmeta!(ExperimentalDesign,
+                    :DocTestSetup,
+                    :(using ExperimentalDesign, StatsModels, DataFrames);
+                    recursive = true)
 
 makedocs(
     format = Documenter.HTML(prettyurls = !("local" in ARGS)),

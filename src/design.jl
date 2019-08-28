@@ -85,6 +85,7 @@ function FullFactorial(factors::NamedTuple, formula::FormulaTerm; explicit::Bool
 
     if explicit
         matrix = DataFrame(explicit_fullfactorial(iterator))
+        names!(matrix, [r.sym for r in formula.rhs])
     end
 
     FullFactorial(matrix, iterator, factors, formula)
@@ -95,6 +96,34 @@ $(TYPEDSIGNATURES)
 """
 function FullFactorial(factors::NamedTuple; explicit::Bool = false)
     FullFactorial(factors, term(:response) ~ sum(term.(keys(factors))), explicit = explicit)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> FullFactorial(([1, 2, 4], [:a, :b], [1.0, -1.0]), explicit = true)
+FullFactorial(12×3 DataFrames.DataFrame
+│ Row │ factor1 │ factor2 │ factor3 │
+│     │ Any     │ Any     │ Any     │
+├─────┼─────────┼─────────┼─────────┤
+│ 1   │ 1       │ a       │ 1.0     │
+│ 2   │ 2       │ a       │ 1.0     │
+│ 3   │ 4       │ a       │ 1.0     │
+│ 4   │ 1       │ b       │ 1.0     │
+│ 5   │ 2       │ b       │ 1.0     │
+│ 6   │ 4       │ b       │ 1.0     │
+│ 7   │ 1       │ a       │ -1.0    │
+│ 8   │ 2       │ a       │ -1.0    │
+│ 9   │ 4       │ a       │ -1.0    │
+│ 10  │ 1       │ b       │ -1.0    │
+│ 11  │ 2       │ b       │ -1.0    │
+│ 12  │ 4       │ b       │ -1.0    │, Base.Iterators.ProductIterator{Tuple{Array{Int64,1},Array{Symbol,1},Array{Float64,1}}}(([1, 2, 4], Symbol[:a, :b], [1.0, -1.0])), (factor1 = [1, 2, 4], factor2 = Symbol[:a, :b], factor3 = [1.0, -1.0]), response ~ factor1 + factor2 + factor3)
+
+```
+"""
+function FullFactorial(factors::Tuple; explicit::Bool = false)
+    FullFactorial(NamedTuple{Tuple(Symbol("factor" * string(i)) for i = 1:length(factors))}(factors), explicit = explicit)
 end
 
 """

@@ -2,13 +2,7 @@
 
 module ExperimentalDesign
 
-using Random
-using Logging
-using Primes
-using DataFrames
-using StatsModels
-using DocStringExtensions
-using LinearAlgebra
+using Random, Logging, Primes, DataFrames, StatsModels, DocStringExtensions, LinearAlgebra
 
 # Types
 
