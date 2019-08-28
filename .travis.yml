@@ -5,8 +5,11 @@ julia:
 os:
   - linux
 
-codecov: true
-coveralls: true
+notifications:
+  email: false
+
+after_success:
+  - julia test/coverage.jl
 
 jobs:
   include:

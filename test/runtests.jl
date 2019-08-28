@@ -1,4 +1,6 @@
-using Test, Documenter, ExperimentalDesign
+using Test
+using Documenter
+using ExperimentalDesign
 
 tests = ["variance_predictions.jl"]
 
