@@ -5,17 +5,19 @@ julia:
 os:
   - linux
 
+codecov: true
+coveralls: true
+
 notifications:
   email: false
 
-after_success:
-  - julia test/coverage.jl
-
 jobs:
   include:
+    - stage: "Test"
+      script:
+        - julia -e 'using Pkg; Pkg.build(; verbose = true); Pkg.test(coverage=true)'
+      after_success: julia test/coverage.jl
     - stage: "Documentation"
-      julia: 1.1
-      os: linux
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
