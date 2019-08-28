@@ -1,5 +1,20 @@
 """
 $(TYPEDSIGNATURES)
+
+Gets the next prime `p`, starting from `n`, for which `(p + offset) % divisor ==
+0` holds.
+
+```jldoctest
+julia> next_offset_divisible_prime(3, 1, 4, 1000)
+3
+
+julia> next_offset_divisible_prime(5, 1, 4, 1000)
+7
+
+julia> next_offset_divisible_prime(4, 1, 4, 1000)
+7
+
+```
 """
 function next_offset_divisible_prime(n::Int, offset::Int, divisor::Int, tries::Int)
     for i = 1:tries
@@ -12,22 +27,6 @@ function next_offset_divisible_prime(n::Int, offset::Int, divisor::Int, tries::I
 
     error("There are no primes from $n, within $tries tries, " *
           "divisible by $divisor with offset $offset")
-end
-
-"""
-$(TYPEDSIGNATURES)
-"""
-function primes_divisible_offset(factor::Int, offset::Int, max_prime::Int)
-    all_primes = primes(max_prime)
-    selected_primes = Int[]
-
-    sizehint!(selected_primes, length(all_primes))
-
-    @inbounds for i = 1:length(all_primes)
-        (all_primes[i] + offset) % factor == 0 && push!(selected_primes, all_primes[i])
-    end
-
-    return selected_primes
 end
 
 """
@@ -47,13 +46,48 @@ following properties, obtained in the original Plackett-Burman paper:
 > Plackett,  R.L. and  Burman, J.P.,  1946. The  design of  optimum multifactorial
 > experiments. Biometrika, 33(4), pp.305-325.
 
+```jldoctest
+julia> isplackettburman(plackettburman(2))
+true
+
+julia> isplackettburman(plackettburman(4))
+true
+
+julia> isplackettburman(plackettburman(16))
+true
+
+julia> isplackettburman(rand(4,4))
+ERROR: MethodError: no method matching isplackettburman(::Array{Float64,2})
+[...]
+
+julia> isplackettburman(rand(Int, 4,4))
+false
+
+```
 """
 function isplackettburman(d::Matrix{Int})
-    sum(sum(d, dims = 1)) == 0 && sum(sum(d'*d, dims = 1) / size(d, 1)) == size(d, 2)
+    sum(sum(d, dims = 1)) == 0 && sum(sum(d' * d, dims = 1) / size(d, 1)) == size(d, 2)
 end
 
 """
 $(TYPEDSIGNATURES)
+
+The  Paley construction  is a  method for  constructing Hadamard  matrices using
+finite fields. See https://en.wikipedia.org/wiki/Paley_construction
+
+```jldoctest
+julia> paley(Matrix{Int}(undef, 8, 8))
+8×8 Array{Int64,2}:
+ -1   1   1  -1   1   1   1  -1
+  1   1  -1   1   1   1  -1  -1
+  1  -1   1   1   1  -1  -1   1
+ -1   1   1   1  -1  -1   1   1
+  1   1   1  -1  -1   1   1  -1
+  1   1  -1  -1   1   1  -1   1
+  1  -1  -1   1   1  -1   1   1
+ -1  -1   1   1  -1   1   1   1
+
+```
 """
 function paley(matrix::Matrix{Int})
     dimension::Tuple{Int, Int} = size(matrix)
@@ -93,8 +127,21 @@ end
 $(TYPEDSIGNATURES)
 
 Constructs a Plackett-Burman  design with size `matrix_size` if  possible, or to
-the closest, smallest, number for which it is possible.
+the closest, largest, number for which it is possible.
 
+```jldoctest
+julia> plackettburman(4)
+8×7 Array{Int64,2}:
+  1   1   1   1   1   1   1
+ -1   1  -1   1   1  -1  -1
+  1  -1   1   1  -1  -1  -1
+ -1   1   1  -1  -1  -1   1
+  1   1  -1  -1  -1   1  -1
+  1  -1  -1  -1   1  -1   1
+ -1  -1  -1   1  -1   1   1
+ -1  -1   1  -1   1   1  -1
+
+```
 """
 function plackettburman(matrix_size::Int)
     p = next_offset_divisible_prime(matrix_size, 1, 4, 1000)
