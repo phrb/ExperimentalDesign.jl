@@ -20,6 +20,11 @@ abstract type AbstractOptimalDesign <: AbstractDesign end
 
 """
 $(TYPEDEF)
+"""
+abstract type AbstractRandomDesign <: AbstractDesign end
+
+"""
+$(TYPEDEF)
 
 Encapsulates  a  Plackett-Burman  screening  design  constructed  using  Paley's
 method.  Factor  levels are  encoded as  `:high` and  `:low` symbols,  and extra
@@ -223,6 +228,81 @@ end
 $(TYPEDEF)
 
 $(TYPEDFIELDS)
+
+Encapsulates a random design generator.  Receives a `NamedTuple` of factor names
+associated  with `Distribution`s  from the  the *Distributions*  package.  After
+instantiating  a  `RandomDesign`,  you  must   request  samples  from  it  using
+[`rand`](@ref).
+
 """
-struct Optimal <: AbstractOptimalDesign
+struct RandomDesign <: AbstractRandomDesign
+    factors::NamedTuple
+    formula::FormulaTerm
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> RandomDesign((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10)))
+RandomDesign((f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0)), response ~ f1 + f2 + f3)
+
+```
+"""
+function RandomDesign(factors::NamedTuple)
+    RandomDesign(factors, term(:response) ~ sum(term.(keys(factors))))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> RandomDesign((Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)))
+RandomDesign((factor1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), factor2 = Distributions.DiscreteUniform(a=-1, b=5), factor3 = Distributions.Uniform{Float64}(a=5.0, b=10.0)), response ~ factor1 + factor2 + factor3)
+
+```
+"""
+function RandomDesign(factors::Tuple)
+    RandomDesign(NamedTuple{Tuple(Symbol("factor" * string(i)) for i = 1:length(factors))}(factors))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> rand(RandomDesign((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10))), 12)
+12×3 DataFrames.DataFrame
+│ Row │ f1      │ f2   │ f3      │
+│     │ Real    │ Real │ Real    │
+├─────┼─────────┼──────┼─────────┤
+│ 1   │ 2.04922 │ 5    │ 8.85741 │
+│ 2   │ 2.25659 │ -1   │ 6.57617 │
+│ 3   │ 2.86526 │ 4    │ 5.41422 │
+│ 4   │ 2.81201 │ -1   │ 5.40944 │
+│ 5   │ 2.92412 │ 1    │ 6.22902 │
+│ 6   │ 2.20051 │ 5    │ 8.80749 │
+│ 7   │ 2.69459 │ 3    │ 6.34626 │
+│ 8   │ 2.28902 │ 2    │ 8.72759 │
+│ 9   │ 2.95173 │ 0    │ 5.42517 │
+│ 10  │ 2.35163 │ 4    │ 5.89413 │
+│ 11  │ 2.97614 │ 5    │ 9.99911 │
+│ 12  │ 2.4577  │ 0    │ 8.303   │
+
+```
+"""
+function rand(design::RandomDesign, n::Int = 1)
+    DataFrame(random_design(values(design.factors), n), collect(keys(design.factors)))
+end
+
+
+"""
+$(TYPEDEF)
+
+$(TYPEDFIELDS)
+"""
+struct OptimalDesign <: AbstractOptimalDesign
+    matrix::DataFrame
+    candidates::AbstractDesign
+    criteria::Dict{Symbol, Float64}
+    formula::FormulaTerm
 end

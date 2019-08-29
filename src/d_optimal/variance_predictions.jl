@@ -61,7 +61,7 @@ $(TYPEDSIGNATURES)
 
 Generates a random design of size `size` with `factors` numerical factors.
 """
-function random_design(factors::Int, size::Int)
+function generate_random_design(factors::Int, size::Int)
     data = Dict("_" => ones(size))
 
     for i in 1:factors
@@ -161,7 +161,7 @@ function optimize_design(;factors::Int,
             if refresh_candidate_set
                 @debug "Regenerating candidate set..." i
 
-                candidate_set = random_design(factors, candidate_set_size)
+                candidate_set = generate_random_design(factors, candidate_set_size)
 
                 formula = linear_model(candidate_set)
 
@@ -204,8 +204,8 @@ function measure_optimize_design_refresh(refresh_candidate_set)
     candidate_set_size = 1000
     iterations = 40
 
-    design = random_design(factors, experiments)
-    candidate_set = random_design(factors, candidate_set_size)
+    design = generate_random_design(factors, experiments)
+    candidate_set = generate_random_design(factors, candidate_set_size)
 
     optimized_design = optimize_design(factors = factors,
                                        levels = levels,

@@ -12,7 +12,9 @@ tests = ["variance_predictions.jl"]
     @testset "Doctests" begin
         DocMeta.setdocmeta!(ExperimentalDesign,
                             :DocTestSetup,
-                            :(using ExperimentalDesign, StatsModels, DataFrames);
+                            :(using ExperimentalDesign, Distributions,
+                              Random, StatsModels, DataFrames;
+                              Random.seed!(443591););
                             recursive = true)
         doctest(ExperimentalDesign)
     end

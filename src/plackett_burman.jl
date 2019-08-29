@@ -72,8 +72,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-The  Paley construction  is a  method for  constructing Hadamard  matrices using
-finite fields. See https://en.wikipedia.org/wiki/Paley_construction
+The [Paley  construction](https://en.wikipedia.org/wiki/Paley_construction) is a
+method for constructing Hadamard matrices using finite fields.
 
 ```jldoctest
 julia> paley(Matrix{Int}(undef, 8, 8))

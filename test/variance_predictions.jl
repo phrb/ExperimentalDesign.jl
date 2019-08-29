@@ -12,8 +12,8 @@ using Random, Logging
         Random.seed!(seed)
 
         if refresh_candidate_set || !full_factorial
-            design = random_design(factors, experiments)
-            candidate_set = random_design(factors, candidate_set_size)
+            design = generate_random_design(factors, experiments)
+            candidate_set = generate_random_design(factors, candidate_set_size)
         else
             candidate_set = expanded_design(factors, levels)
             removed_indices = randperm(levels ^ factors)[1:experiments]

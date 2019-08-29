@@ -11,7 +11,9 @@ end
 
 DocMeta.setdocmeta!(ExperimentalDesign,
                     :DocTestSetup,
-                    :(using ExperimentalDesign, StatsModels, DataFrames);
+                    :(using ExperimentalDesign, Distributions,
+                      Random, StatsModels, DataFrames;
+                      Random.seed!(443591););
                     recursive = true)
 
 makedocs(
