@@ -16,7 +16,7 @@ requests are more than welcome!  Current features are:
 - Full factorial designs
 - Plackett-Burman designs for screening
 - Flexible random designs using the [Distributions](https://github.com/JuliaStats/Distributions.jl) package
-- Variance-optimizing Designs for several criteria
+- Variance-optimizing designs for several criteria
 
 Intended features include the ones provided by R packages such as
 [DoE.base](https://cran.r-project.org/web/packages/DoE.base/index.html),
