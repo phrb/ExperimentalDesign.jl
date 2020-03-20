@@ -55,3 +55,6 @@ Manifest.toml
 
 # Generated Data from Examples
 *.csv
+
+# Jupyter
+*.ipynb
