@@ -36,5 +36,4 @@ makedocs(
 # Documenter can also automatically deploy documentation to gh-pages.
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
-deploydocs(repo = "github.com/phrb/ExperimentalDesign.jl.git",
-           julia = "1.3")
+deploydocs(repo = "github.com/phrb/ExperimentalDesign.jl.git")
