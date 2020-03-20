@@ -56,7 +56,7 @@ PlackettBurman(8×7 DataFrames.DataFrame
 │ 5   │ 1     │ 1     │ -1    │ -1    │ -1     │ 1      │ -1     │
 │ 6   │ 1     │ -1    │ -1    │ -1    │ 1      │ -1     │ 1      │
 │ 7   │ -1    │ -1    │ -1    │ 1     │ -1     │ 1      │ 1      │
-│ 8   │ -1    │ -1    │ 1     │ -1    │ 1      │ 1      │ -1     │, (:x1, :x2, :x3, :x4), (:dummy1, :dummy2, :dummy3), y ~ x1 + x2 + x3 + x4 + dummy1 + dummy2 + dummy3)
+│ 8   │ -1    │ -1    │ 1     │ -1    │ 1      │ 1      │ -1     │, (:x1, :x2, :x3, :x4), (:dummy1, :dummy2, :dummy3), y ~ -1 + x1 + x2 + x3 + x4 + dummy1 + dummy2 + dummy3)
 
 ```
 """
@@ -85,7 +85,7 @@ function PlackettBurman(formula::FormulaTerm; symbol_encoding::Bool = false)
     PlackettBurman(design,
                    symbol_factors,
                    dummy_factors,
-                   term(formula.lhs) ~ sum(term.(design_names)))
+                   term(formula.lhs) ~ term(-1) + sum(term.(design_names)))
 end
 
 """
@@ -104,7 +104,7 @@ PlackettBurman(8×7 DataFrames.DataFrame
 │ 5   │ 1       │ 1       │ -1      │ -1      │ -1     │ 1      │ -1     │
 │ 6   │ 1       │ -1      │ -1      │ -1      │ 1      │ -1     │ 1      │
 │ 7   │ -1      │ -1      │ -1      │ 1       │ -1     │ 1      │ 1      │
-│ 8   │ -1      │ -1      │ 1       │ -1      │ 1      │ 1      │ -1     │, (:factor1, :factor2, :factor3, :factor4), (:dummy1, :dummy2, :dummy3), response ~ factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3)
+│ 8   │ -1      │ -1      │ 1       │ -1      │ 1      │ 1      │ -1     │, (:factor1, :factor2, :factor3, :factor4), (:dummy1, :dummy2, :dummy3), response ~ -1 + factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3)
 
 ```
 """
