@@ -56,10 +56,6 @@ true
 julia> isplackettburman(plackettburman(16))
 true
 
-julia> isplackettburman(rand(4,4))
-ERROR: MethodError: no method matching isplackettburman(::Array{Float64,2})
-[...]
-
 julia> isplackettburman(rand(Int, 4,4))
 false
 

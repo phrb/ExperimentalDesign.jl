@@ -46,37 +46,41 @@ $(TYPEDSIGNATURES)
 ```jldoctest
 julia> PlackettBurman(@formula(y ~ x1 + x2 + x3 + x4))
 PlackettBurman(8×7 DataFrames.DataFrame
-│ Row │ x1     │ x2     │ x3     │ x4     │ dummy1 │ dummy2 │ dummy3 │
-│     │ Symbol │ Symbol │ Symbol │ Symbol │ Symbol │ Symbol │ Symbol │
-├─────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-│ 1   │ high   │ high   │ high   │ high   │ high   │ high   │ high   │
-│ 2   │ low    │ high   │ low    │ high   │ high   │ low    │ low    │
-│ 3   │ high   │ low    │ high   │ high   │ low    │ low    │ low    │
-│ 4   │ low    │ high   │ high   │ low    │ low    │ low    │ high   │
-│ 5   │ high   │ high   │ low    │ low    │ low    │ high   │ low    │
-│ 6   │ high   │ low    │ low    │ low    │ high   │ low    │ high   │
-│ 7   │ low    │ low    │ low    │ high   │ low    │ high   │ high   │
-│ 8   │ low    │ low    │ high   │ low    │ high   │ high   │ low    │, (:x1, :x2, :x3, :x4), (:dummy1, :dummy2, :dummy3), y ~ x1 + x2 + x3 + x4 + dummy1 + dummy2 + dummy3)
+│ Row │ x1    │ x2    │ x3    │ x4    │ dummy1 │ dummy2 │ dummy3 │
+│     │ Int64 │ Int64 │ Int64 │ Int64 │ Int64  │ Int64  │ Int64  │
+├─────┼───────┼───────┼───────┼───────┼────────┼────────┼────────┤
+│ 1   │ 1     │ 1     │ 1     │ 1     │ 1      │ 1      │ 1      │
+│ 2   │ -1    │ 1     │ -1    │ 1     │ 1      │ -1     │ -1     │
+│ 3   │ 1     │ -1    │ 1     │ 1     │ -1     │ -1     │ -1     │
+│ 4   │ -1    │ 1     │ 1     │ -1    │ -1     │ -1     │ 1      │
+│ 5   │ 1     │ 1     │ -1    │ -1    │ -1     │ 1      │ -1     │
+│ 6   │ 1     │ -1    │ -1    │ -1    │ 1      │ -1     │ 1      │
+│ 7   │ -1    │ -1    │ -1    │ 1     │ -1     │ 1      │ 1      │
+│ 8   │ -1    │ -1    │ 1     │ -1    │ 1      │ 1      │ -1     │, (:x1, :x2, :x3, :x4), (:dummy1, :dummy2, :dummy3), y ~ x1 + x2 + x3 + x4 + dummy1 + dummy2 + dummy3)
 
 ```
 """
-function PlackettBurman(formula::FormulaTerm)
+function PlackettBurman(formula::FormulaTerm; symbol_encoding::Bool = false)
     symbol_factors = Tuple(r.sym for r in formula.rhs)
 
     initial_design = plackettburman(length(symbol_factors))
     categorical_design = similar(initial_design, Symbol)
 
-    for i = 1:size(initial_design, 1), j = 1:size(initial_design, 2)
-        categorical_design[i, j] = initial_design[i, j] == 1.0 ? :high : :low
-    end
+    if symbol_encoding
+        for i = 1:size(initial_design, 1), j = 1:size(initial_design, 2)
+            categorical_design[i, j] = initial_design[i, j] == 1.0 ? :high : :low
+        end
 
-    design = DataFrame(categorical_design)
+        design = DataFrame(categorical_design)
+    else
+        design = DataFrame(initial_design)
+    end
 
     dummy_factors = Tuple(Symbol("dummy" * string(i)) for i = 1:(length(names(design)) -
                                                                  length(symbol_factors)))
 
     design_names = (symbol_factors..., dummy_factors...)
-    names!(design, collect(design_names))
+    rename!(design, collect(design_names))
 
     PlackettBurman(design,
                    symbol_factors,
@@ -91,16 +95,16 @@ $(TYPEDSIGNATURES)
 julia> PlackettBurman(4)
 PlackettBurman(8×7 DataFrames.DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │ factor4 │ dummy1 │ dummy2 │ dummy3 │
-│     │ Symbol  │ Symbol  │ Symbol  │ Symbol  │ Symbol │ Symbol │ Symbol │
+│     │ Int64   │ Int64   │ Int64   │ Int64   │ Int64  │ Int64  │ Int64  │
 ├─────┼─────────┼─────────┼─────────┼─────────┼────────┼────────┼────────┤
-│ 1   │ high    │ high    │ high    │ high    │ high   │ high   │ high   │
-│ 2   │ low     │ high    │ low     │ high    │ high   │ low    │ low    │
-│ 3   │ high    │ low     │ high    │ high    │ low    │ low    │ low    │
-│ 4   │ low     │ high    │ high    │ low     │ low    │ low    │ high   │
-│ 5   │ high    │ high    │ low     │ low     │ low    │ high   │ low    │
-│ 6   │ high    │ low     │ low     │ low     │ high   │ low    │ high   │
-│ 7   │ low     │ low     │ low     │ high    │ low    │ high   │ high   │
-│ 8   │ low     │ low     │ high    │ low     │ high   │ high   │ low    │, (:factor1, :factor2, :factor3, :factor4), (:dummy1, :dummy2, :dummy3), response ~ factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3)
+│ 1   │ 1       │ 1       │ 1       │ 1       │ 1      │ 1      │ 1      │
+│ 2   │ -1      │ 1       │ -1      │ 1       │ 1      │ -1     │ -1     │
+│ 3   │ 1       │ -1      │ 1       │ 1       │ -1     │ -1     │ -1     │
+│ 4   │ -1      │ 1       │ 1       │ -1      │ -1     │ -1     │ 1      │
+│ 5   │ 1       │ 1       │ -1      │ -1      │ -1     │ 1      │ -1     │
+│ 6   │ 1       │ -1      │ -1      │ -1      │ 1      │ -1     │ 1      │
+│ 7   │ -1      │ -1      │ -1      │ 1       │ -1     │ 1      │ 1      │
+│ 8   │ -1      │ -1      │ 1       │ -1      │ 1      │ 1      │ -1     │, (:factor1, :factor2, :factor3, :factor4), (:dummy1, :dummy2, :dummy3), response ~ factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3)
 
 ```
 """
@@ -154,7 +158,7 @@ function FullFactorial(factors::NamedTuple, formula::FormulaTerm; explicit::Bool
 
     if explicit
         matrix = DataFrame(explicit_fullfactorial(iterator))
-        names!(matrix, [r.sym for r in formula.rhs])
+        rename!(matrix, [r.sym for r in formula.rhs])
     end
 
     FullFactorial(matrix, iterator, factors, formula)
