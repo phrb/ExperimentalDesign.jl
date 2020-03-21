@@ -16,6 +16,10 @@ DocMeta.setdocmeta!(ExperimentalDesign,
                       Random.seed!(443591););
                     recursive = true)
 
+if "fixdoctests" in ARGS
+    doctest(ExperimentalDesign, fix = true)
+end
+
 makedocs(
     format = Documenter.HTML(prettyurls = !("local" in ARGS)),
     modules = [ExperimentalDesign],

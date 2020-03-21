@@ -221,6 +221,31 @@ function FullFactorial(factors::Tuple; explicit::Bool = false)
 end
 
 """
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> FullFactorial(fill([-1, 1], 3), explicit = true)
+FullFactorial(8×3 DataFrames.DataFrame
+│ Row │ factor1 │ factor2 │ factor3 │
+│     │ Int64   │ Int64   │ Int64   │
+├─────┼─────────┼─────────┼─────────┤
+│ 1   │ -1      │ -1      │ -1      │
+│ 2   │ 1       │ -1      │ -1      │
+│ 3   │ -1      │ 1       │ -1      │
+│ 4   │ 1       │ 1       │ -1      │
+│ 5   │ -1      │ -1      │ 1       │
+│ 6   │ 1       │ -1      │ 1       │
+│ 7   │ -1      │ 1       │ 1       │
+│ 8   │ 1       │ 1       │ 1       │, Base.Iterators.ProductIterator{Tuple{Array{Int64,1},Array{Int64,1},Array{Int64,1}}}(([-1, 1], [-1, 1], [-1, 1])), (factor1 = [-1, 1], factor2 = [-1, 1], factor3 = [-1, 1]), response ~ factor1 + factor2 + factor3)
+
+```
+"""
+function FullFactorial(factors::Array; explicit::Bool = false)
+    FullFactorial(tuple(factors...); explicit = explicit)
+end
+
+
+"""
 $(TYPEDEF)
 
 $(TYPEDFIELDS)
@@ -268,6 +293,33 @@ RandomDesign((factor1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), factor2 = 
 """
 function RandomDesign(factors::Tuple)
     RandomDesign(NamedTuple{Tuple(Symbol("factor" * string(i)) for i = 1:length(factors))}(factors))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> RandomDesign([Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)])
+RandomDesign((factor1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), factor2 = Distributions.DiscreteUniform(a=-1, b=5), factor3 = Distributions.Uniform{Float64}(a=5.0, b=10.0)), response ~ factor1 + factor2 + factor3)
+
+```
+"""
+function RandomDesign(factors::Array)
+    RandomDesign(tuple(factors...))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> RandomDesign(DiscreteNonParametric([-1, 1], [0.5, 0.5]), 6)
+RandomDesign((factor1 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor2 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor3 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor4 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor5 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor6 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])), response ~ factor1 + factor2 + factor3 + factor4 + factor5 + factor6)
+
+```
+"""
+function RandomDesign(distribution::D, n::Int) where D <: Distribution
+    factors = tuple(fill(distribution, n)...)
+    RandomDesign(factors)
 end
 
 """
