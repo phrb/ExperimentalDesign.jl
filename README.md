@@ -1,22 +1,30 @@
-# ExperimentalDesign.jl
+# ExperimentalDesign
 
 | Build | Docs | Test Coverage |
 | --- | --- | --- |
 | [![Build Status](https://travis-ci.org/phrb/ExperimentalDesign.jl.svg?branch=master)](https://travis-ci.org/phrb/ExperimentalDesign.jl) | [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://phrb.github.io/ExperimentalDesign.jl/dev) | [![Coverage Status](https://coveralls.io/repos/github/phrb/ExperimentalDesign.jl/badge.svg?branch=master)](https://coveralls.io/github/phrb/ExperimentalDesign.jl?branch=master) [![codecov.io](http://codecov.io/github/phrb/ExperimentalDesign.jl/coverage.svg?branch=master)](http://codecov.io/github/phrb/ExperimentalDesign.jl?branch=master) |
 
-ExperimentalDesign.jl  provides  tools  for  Design  of  Experiments  in  Julia,
+ExperimentalDesign  provides  tools  for  Design  of  Experiments  in  Julia,
 enabling the construction  of designs for screening,  modeling, exploration, and
 optimization.
 
 Development  on this  package  is  ongoing, so  expect  things  to change.  Pull
-requests are more than welcome!  Current features are:
+requests are more than welcome!
 
-- Designs supporting categorical and continuous factors
+Check the [documentation](https://phrb.github.io/ExperimentalDesign.jl/dev/)
+for the latest features and API, and check the examples directory for
+Jupyter Notebooks and code.
+
+Current features are:
+
+- Designs that support categorical and continuous factors
 - Integration with [StatsModels](https://github.com/JuliaStats/StatsModels.jl) `@formula`
-- Full factorial designs
-- Plackett-Burman designs for screening
+- Full factorial designs:
+  - Explicit: for small designs that fit in memory
+  - Iterable: for larger designs, generates experiments on demand
+- Plackett-Burman designs for screening (check the [example](https://github.com/phrb/ExperimentalDesign.jl/blob/master/examples/Screening%20with%20Plackett-Burman%20Designs.ipynb))
 - Flexible random designs using the [Distributions](https://github.com/JuliaStats/Distributions.jl) package
-- Variance-optimizing designs for several criteria
+- Several variance-optimizing criteria
 
 Intended features include the ones provided by R packages such as
 [DoE.base](https://cran.r-project.org/web/packages/DoE.base/index.html),
