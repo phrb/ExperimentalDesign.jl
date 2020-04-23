@@ -45,7 +45,13 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> PlackettBurman(@formula(y ~ x1 + x2 + x3 + x4))
-PlackettBurman(8×7 DataFrames.DataFrame
+PlackettBurman
+Dimension: (8, 7)
+Factors: (:x1, :x2, :x3, :x4)
+Dummy Factors: (:dummy1, :dummy2, :dummy3)
+Formula: y ~ -1 + x1 + x2 + x3 + x4 + dummy1 + dummy2 + dummy3
+Design Matrix:
+8×7 DataFrames.DataFrame
 │ Row │ x1    │ x2    │ x3    │ x4    │ dummy1 │ dummy2 │ dummy3 │
 │     │ Int64 │ Int64 │ Int64 │ Int64 │ Int64  │ Int64  │ Int64  │
 ├─────┼───────┼───────┼───────┼───────┼────────┼────────┼────────┤
@@ -56,7 +62,7 @@ PlackettBurman(8×7 DataFrames.DataFrame
 │ 5   │ 1     │ 1     │ -1    │ -1    │ -1     │ 1      │ -1     │
 │ 6   │ 1     │ -1    │ -1    │ -1    │ 1      │ -1     │ 1      │
 │ 7   │ -1    │ -1    │ -1    │ 1     │ -1     │ 1      │ 1      │
-│ 8   │ -1    │ -1    │ 1     │ -1    │ 1      │ 1      │ -1     │, (:x1, :x2, :x3, :x4), (:dummy1, :dummy2, :dummy3), y ~ -1 + x1 + x2 + x3 + x4 + dummy1 + dummy2 + dummy3)
+│ 8   │ -1    │ -1    │ 1     │ -1    │ 1      │ 1      │ -1     │
 
 ```
 """
@@ -93,7 +99,13 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> PlackettBurman(4)
-PlackettBurman(8×7 DataFrames.DataFrame
+PlackettBurman
+Dimension: (8, 7)
+Factors: (:factor1, :factor2, :factor3, :factor4)
+Dummy Factors: (:dummy1, :dummy2, :dummy3)
+Formula: response ~ -1 + factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3
+Design Matrix:
+8×7 DataFrames.DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │ factor4 │ dummy1 │ dummy2 │ dummy3 │
 │     │ Int64   │ Int64   │ Int64   │ Int64   │ Int64  │ Int64  │ Int64  │
 ├─────┼─────────┼─────────┼─────────┼─────────┼────────┼────────┼────────┤
@@ -104,7 +116,7 @@ PlackettBurman(8×7 DataFrames.DataFrame
 │ 5   │ 1       │ 1       │ -1      │ -1      │ -1     │ 1      │ -1     │
 │ 6   │ 1       │ -1      │ -1      │ -1      │ 1      │ -1     │ 1      │
 │ 7   │ -1      │ -1      │ -1      │ 1       │ -1     │ 1      │ 1      │
-│ 8   │ -1      │ -1      │ 1       │ -1      │ 1      │ 1      │ -1     │, (:factor1, :factor2, :factor3, :factor4), (:dummy1, :dummy2, :dummy3), response ~ -1 + factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3)
+│ 8   │ -1      │ -1      │ 1       │ -1      │ 1      │ 1      │ -1     │
 
 ```
 """
@@ -133,7 +145,12 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> FullFactorial((A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0]), @formula(y ~ A + B +C), explicit = true)
-FullFactorial(12×3 DataFrames.DataFrame
+FullFactorial
+Dimension: (12, 3)
+Factors: (A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0])
+Formula: y ~ A + B + C
+Design Matrix:
+12×3 DataFrames.DataFrame
 │ Row │ A   │ B   │ C    │
 │     │ Any │ Any │ Any  │
 ├─────┼─────┼─────┼──────┤
@@ -148,7 +165,7 @@ FullFactorial(12×3 DataFrames.DataFrame
 │ 9   │ 4   │ a   │ -1.0 │
 │ 10  │ 1   │ b   │ -1.0 │
 │ 11  │ 2   │ b   │ -1.0 │
-│ 12  │ 4   │ b   │ -1.0 │, Base.Iterators.ProductIterator{Tuple{Array{Int64,1},Array{Symbol,1},Array{Float64,1}}}(([1, 2, 4], Symbol[:a, :b], [1.0, -1.0])), (A = [1, 2, 4], B = Symbol[:a, :b], C = [1.0, -1.0]), y ~ A + B + C)
+│ 12  │ 4   │ b   │ -1.0 │
 
 ```
 """
@@ -169,7 +186,12 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> FullFactorial((A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0]), explicit = true)
-FullFactorial(12×3 DataFrames.DataFrame
+FullFactorial
+Dimension: (12, 3)
+Factors: (A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0])
+Formula: response ~ A + B + C
+Design Matrix:
+12×3 DataFrames.DataFrame
 │ Row │ A   │ B   │ C    │
 │     │ Any │ Any │ Any  │
 ├─────┼─────┼─────┼──────┤
@@ -184,7 +206,7 @@ FullFactorial(12×3 DataFrames.DataFrame
 │ 9   │ 4   │ a   │ -1.0 │
 │ 10  │ 1   │ b   │ -1.0 │
 │ 11  │ 2   │ b   │ -1.0 │
-│ 12  │ 4   │ b   │ -1.0 │, Base.Iterators.ProductIterator{Tuple{Array{Int64,1},Array{Symbol,1},Array{Float64,1}}}(([1, 2, 4], Symbol[:a, :b], [1.0, -1.0])), (A = [1, 2, 4], B = Symbol[:a, :b], C = [1.0, -1.0]), response ~ A + B + C)
+│ 12  │ 4   │ b   │ -1.0 │
 
 ```
 """
@@ -197,7 +219,12 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> FullFactorial(([1, 2, 4], [:a, :b], [1.0, -1.0]), explicit = true)
-FullFactorial(12×3 DataFrames.DataFrame
+FullFactorial
+Dimension: (12, 3)
+Factors: (factor1 = [1, 2, 4], factor2 = [:a, :b], factor3 = [1.0, -1.0])
+Formula: response ~ factor1 + factor2 + factor3
+Design Matrix:
+12×3 DataFrames.DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │
 │     │ Any     │ Any     │ Any     │
 ├─────┼─────────┼─────────┼─────────┤
@@ -212,7 +239,7 @@ FullFactorial(12×3 DataFrames.DataFrame
 │ 9   │ 4       │ a       │ -1.0    │
 │ 10  │ 1       │ b       │ -1.0    │
 │ 11  │ 2       │ b       │ -1.0    │
-│ 12  │ 4       │ b       │ -1.0    │, Base.Iterators.ProductIterator{Tuple{Array{Int64,1},Array{Symbol,1},Array{Float64,1}}}(([1, 2, 4], Symbol[:a, :b], [1.0, -1.0])), (factor1 = [1, 2, 4], factor2 = Symbol[:a, :b], factor3 = [1.0, -1.0]), response ~ factor1 + factor2 + factor3)
+│ 12  │ 4       │ b       │ -1.0    │
 
 ```
 """
@@ -225,7 +252,12 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> FullFactorial(fill([-1, 1], 3), explicit = true)
-FullFactorial(8×3 DataFrames.DataFrame
+FullFactorial
+Dimension: (8, 3)
+Factors: (factor1 = [-1, 1], factor2 = [-1, 1], factor3 = [-1, 1])
+Formula: response ~ factor1 + factor2 + factor3
+Design Matrix:
+8×3 DataFrames.DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │
 │     │ Int64   │ Int64   │ Int64   │
 ├─────┼─────────┼─────────┼─────────┤
@@ -236,7 +268,7 @@ FullFactorial(8×3 DataFrames.DataFrame
 │ 5   │ -1      │ -1      │ 1       │
 │ 6   │ 1       │ -1      │ 1       │
 │ 7   │ -1      │ 1       │ 1       │
-│ 8   │ 1       │ 1       │ 1       │, Base.Iterators.ProductIterator{Tuple{Array{Int64,1},Array{Int64,1},Array{Int64,1}}}(([-1, 1], [-1, 1], [-1, 1])), (factor1 = [-1, 1], factor2 = [-1, 1], factor3 = [-1, 1]), response ~ factor1 + factor2 + factor3)
+│ 8   │ 1       │ 1       │ 1       │
 
 ```
 """
@@ -274,7 +306,12 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> RandomDesign((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10)))
-RandomDesign((f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0)), response ~ f1 + f2 + f3)
+RandomDesign
+Formula: response ~ f1 + f2 + f3
+Factor Distributions:
+f1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
+f2: Distributions.DiscreteUniform(a=-1, b=5)
+f3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
@@ -287,7 +324,12 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> RandomDesign((Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)))
-RandomDesign((factor1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), factor2 = Distributions.DiscreteUniform(a=-1, b=5), factor3 = Distributions.Uniform{Float64}(a=5.0, b=10.0)), response ~ factor1 + factor2 + factor3)
+RandomDesign
+Formula: response ~ factor1 + factor2 + factor3
+Factor Distributions:
+factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
+factor2: Distributions.DiscreteUniform(a=-1, b=5)
+factor3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
@@ -300,7 +342,12 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> RandomDesign([Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)])
-RandomDesign((factor1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), factor2 = Distributions.DiscreteUniform(a=-1, b=5), factor3 = Distributions.Uniform{Float64}(a=5.0, b=10.0)), response ~ factor1 + factor2 + factor3)
+RandomDesign
+Formula: response ~ factor1 + factor2 + factor3
+Factor Distributions:
+factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
+factor2: Distributions.DiscreteUniform(a=-1, b=5)
+factor3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
@@ -313,7 +360,15 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> RandomDesign(DiscreteNonParametric([-1, 1], [0.5, 0.5]), 6)
-RandomDesign((factor1 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor2 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor3 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor4 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor5 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5]), factor6 = Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])), response ~ factor1 + factor2 + factor3 + factor4 + factor5 + factor6)
+RandomDesign
+Formula: response ~ factor1 + factor2 + factor3 + factor4 + factor5 + factor6
+Factor Distributions:
+factor1: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor2: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor3: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor4: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor5: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor6: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
 
 ```
 """
