@@ -22,8 +22,7 @@ export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
 # Methods
 
 export fullfactorial,  explicit_fullfactorial, plackettburman, isplackettburman,
-    paley,     optimize_design,     expanded_design,     generate_random_design,
-    rand, random_design, next_offset_divisible_prime
+    paley, rand, random_design, next_offset_divisible_prime
 
 # Pretty printing
 

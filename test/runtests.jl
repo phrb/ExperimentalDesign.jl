@@ -2,7 +2,7 @@ using Test
 using Documenter
 using ExperimentalDesign
 
-tests = ["variance_predictions.jl"]
+tests = []
 
 @testset "ExperimentalDesign" begin
     for test in tests
