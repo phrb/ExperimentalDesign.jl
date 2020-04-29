@@ -23,7 +23,7 @@ export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
 
 export fullfactorial,  explicit_fullfactorial, plackettburman, isplackettburman,
     paley,     optimize_design,     expanded_design,     generate_random_design,
-    rand, random_design, d_criterion, next_offset_divisible_prime
+    rand, random_design, next_offset_divisible_prime
 
 # Pretty printing
 
@@ -34,6 +34,5 @@ include("plackett_burman.jl")
 include("factorial.jl")
 include("random.jl")
 include("custom_show.jl")
-include("d_optimal/variance_predictions.jl")
 
 end
