@@ -19,7 +19,7 @@ StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
-DataFrames = "~0.20.2"
+DataFrames = "~0.20.2, 0.21"
 DataStructures = "~0.17.10"
 Distributions = "~0.22.6, 0.23"
 DocStringExtensions = "~0.8.1"
