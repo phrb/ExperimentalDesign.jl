@@ -2,23 +2,25 @@
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> random_design((Uniform(2, 3), DiscreteUniform(-1, 5), Uniform(5, 10)), 10)
-10×3 Array{Real,2}:
- 2.04922   5  8.85741
- 2.25659  -1  6.57617
- 2.86526   4  5.41422
- 2.81201  -1  5.40944
- 2.92412   1  6.22902
- 2.20051   5  8.80749
- 2.69459   3  6.34626
- 2.28902   2  8.72759
- 2.95173   0  5.42517
- 2.35163   4  5.89413
+julia> random_design!(zeros(10, 3), (Uniform(2, 3), DiscreteUniform(-1, 5), Uniform(5, 10)), 10)
+10×3 Array{Float64,2}:
+ 2.04922  -1.0  6.44508
+ 2.59117   3.0  5.57183
+ 2.77148   5.0  8.72759
+ 2.25659   1.0  9.75865
+ 2.64968   4.0  5.72029
+ 2.31523   5.0  8.48192
+ 2.86526   5.0  5.42517
+ 2.44753   4.0  6.75815
+ 2.08284   3.0  8.94993
+ 2.81201  -1.0  5.89413
 
 ```
 """
-function random_design(distributions::Tuple, size::Int)
-    permutedims(foldl((x, y) -> hcat(collect(x),
-                                     collect(y)),
-                      (rand(d) for d in distributions) for i = 1:size))
+function random_design!(design::Array{Float64, 2}, distributions::Tuple, n::Int)
+    for d in 1:size(distributions, 1)
+        design[:, d] .= rand(distributions[d], n)
+    end
+
+    return design
 end

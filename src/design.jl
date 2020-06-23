@@ -103,7 +103,7 @@ PlackettBurman
 Dimension: (8, 7)
 Factors: (:factor1, :factor2, :factor3, :factor4)
 Dummy Factors: (:dummy1, :dummy2, :dummy3)
-Formula: response ~ -1 + factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3
+Formula: 0 ~ -1 + factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3
 Design Matrix:
 8×7 DataFrames.DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │ factor4 │ dummy1 │ dummy2 │ dummy3 │
@@ -121,21 +121,32 @@ Design Matrix:
 ```
 """
 function PlackettBurman(factors::Int)
-    PlackettBurman(term(:response) ~ sum(term.(Symbol("factor" * string(i)) for i = 1:factors)))
+    PlackettBurman(ConstantTerm(0) ~ sum(term.(Symbol("factor" * string(i)) for i = 1:factors)))
 end
 
 """
 $(TYPEDEF)
 
-Encapsulates a full  factorial design. Can contain an explicit  design where all
-experiments are completely computed and stored, or an iterator of a design, from
-which experiments may be extracted as needed.
+Encapsulates  an *explicit*  full factorial  design, where  all experiments  are
+completely computed  and stored.  Use [`IterableFullFactorial`](@ref)  to obtain
+an *implicit* factorial  design with arbitrary access to the  elements of a full
+factorial design.
 
 $(TYPEDFIELDS)
 """
 struct FullFactorial <: AbstractFactorialDesign
-    matrix::Union{DataFrame, Missing}
-    iterator::Base.Iterators.ProductIterator
+    matrix::DataFrame
+    factors::NamedTuple
+    formula::FormulaTerm
+end
+
+"""
+$(TYPEDEF)
+
+$(TYPEDFIELDS)
+"""
+struct IterableFullFactorial <: AbstractFactorialDesign
+    matrix::DataFrame
     factors::NamedTuple
     formula::FormulaTerm
 end
@@ -144,7 +155,7 @@ end
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> FullFactorial((A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0]), @formula(y ~ A + B +C), explicit = true)
+julia> FullFactorial((A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0]), @formula(y ~ A + B +C))
 FullFactorial
 Dimension: (12, 3)
 Factors: (A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0])
@@ -169,27 +180,22 @@ Design Matrix:
 
 ```
 """
-function FullFactorial(factors::NamedTuple, formula::FormulaTerm; explicit::Bool = false)
+function FullFactorial(factors::NamedTuple, formula::FormulaTerm)
     iterator = fullfactorial(values(factors))
-    matrix = missing
-
-    if explicit
-        matrix = DataFrame(explicit_fullfactorial(iterator))
-        rename!(matrix, [r.sym for r in formula.rhs])
-    end
-
-    FullFactorial(matrix, iterator, factors, formula)
+    matrix = DataFrame(explicit_fullfactorial(iterator))
+    rename!(matrix, [r.sym for r in formula.rhs])
+    FullFactorial(matrix, factors, formula)
 end
 
 """
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> FullFactorial((A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0]), explicit = true)
+julia> FullFactorial((A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0]))
 FullFactorial
 Dimension: (12, 3)
 Factors: (A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0])
-Formula: response ~ A + B + C
+Formula: 0 ~ A + B + C
 Design Matrix:
 12×3 DataFrames.DataFrame
 │ Row │ A   │ B   │ C    │
@@ -210,19 +216,19 @@ Design Matrix:
 
 ```
 """
-function FullFactorial(factors::NamedTuple; explicit::Bool = false)
-    FullFactorial(factors, term(:response) ~ sum(term.(keys(factors))), explicit = explicit)
+function FullFactorial(factors::NamedTuple)
+    FullFactorial(factors, ConstantTerm(0) ~ sum(term.(keys(factors))))
 end
 
 """
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> FullFactorial(([1, 2, 4], [:a, :b], [1.0, -1.0]), explicit = true)
+julia> FullFactorial(([1, 2, 4], [:a, :b], [1.0, -1.0]))
 FullFactorial
 Dimension: (12, 3)
 Factors: (factor1 = [1, 2, 4], factor2 = [:a, :b], factor3 = [1.0, -1.0])
-Formula: response ~ factor1 + factor2 + factor3
+Formula: 0 ~ factor1 + factor2 + factor3
 Design Matrix:
 12×3 DataFrames.DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │
@@ -243,19 +249,19 @@ Design Matrix:
 
 ```
 """
-function FullFactorial(factors::Tuple; explicit::Bool = false)
-    FullFactorial(NamedTuple{Tuple(Symbol("factor" * string(i)) for i = 1:length(factors))}(factors), explicit = explicit)
+function FullFactorial(factors::Tuple)
+    FullFactorial(NamedTuple{Tuple(Symbol("factor" * string(i)) for i = 1:length(factors))}(factors))
 end
 
 """
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> FullFactorial(fill([-1, 1], 3), explicit = true)
+julia> FullFactorial(fill([-1, 1], 3))
 FullFactorial
 Dimension: (8, 3)
 Factors: (factor1 = [-1, 1], factor2 = [-1, 1], factor3 = [-1, 1])
-Formula: response ~ factor1 + factor2 + factor3
+Formula: 0 ~ factor1 + factor2 + factor3
 Design Matrix:
 8×3 DataFrames.DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │
@@ -272,8 +278,8 @@ Design Matrix:
 
 ```
 """
-function FullFactorial(factors::Array; explicit::Bool = false)
-    FullFactorial(tuple(factors...); explicit = explicit)
+function FullFactorial(factors::Array)
+    FullFactorial(tuple(factors...))
 end
 
 
@@ -307,7 +313,7 @@ $(TYPEDSIGNATURES)
 ```jldoctest
 julia> RandomDesign((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10)))
 RandomDesign
-Formula: response ~ f1 + f2 + f3
+Formula: 0 ~ f1 + f2 + f3
 Factor Distributions:
 f1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
 f2: Distributions.DiscreteUniform(a=-1, b=5)
@@ -316,7 +322,7 @@ f3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 ```
 """
 function RandomDesign(factors::NamedTuple)
-    RandomDesign(factors, term(:response) ~ sum(term.(keys(factors))))
+    RandomDesign(factors, ConstantTerm(0) ~ sum(term.(keys(factors))))
 end
 
 """
@@ -325,7 +331,7 @@ $(TYPEDSIGNATURES)
 ```jldoctest
 julia> RandomDesign((Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)))
 RandomDesign
-Formula: response ~ factor1 + factor2 + factor3
+Formula: 0 ~ factor1 + factor2 + factor3
 Factor Distributions:
 factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
 factor2: Distributions.DiscreteUniform(a=-1, b=5)
@@ -343,7 +349,7 @@ $(TYPEDSIGNATURES)
 ```jldoctest
 julia> RandomDesign([Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)])
 RandomDesign
-Formula: response ~ factor1 + factor2 + factor3
+Formula: 0 ~ factor1 + factor2 + factor3
 Factor Distributions:
 factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
 factor2: Distributions.DiscreteUniform(a=-1, b=5)
@@ -361,7 +367,7 @@ $(TYPEDSIGNATURES)
 ```jldoctest
 julia> RandomDesign(DiscreteNonParametric([-1, 1], [0.5, 0.5]), 6)
 RandomDesign
-Formula: response ~ factor1 + factor2 + factor3 + factor4 + factor5 + factor6
+Formula: 0 ~ factor1 + factor2 + factor3 + factor4 + factor5 + factor6
 Factor Distributions:
 factor1: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
 factor2: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
@@ -383,26 +389,29 @@ $(TYPEDSIGNATURES)
 ```jldoctest
 julia> rand(RandomDesign((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10))), 12)
 12×3 DataFrames.DataFrame
-│ Row │ f1      │ f2   │ f3      │
-│     │ Real    │ Real │ Real    │
-├─────┼─────────┼──────┼─────────┤
-│ 1   │ 2.04922 │ 5    │ 8.85741 │
-│ 2   │ 2.25659 │ -1   │ 6.57617 │
-│ 3   │ 2.86526 │ 4    │ 5.41422 │
-│ 4   │ 2.81201 │ -1   │ 5.40944 │
-│ 5   │ 2.92412 │ 1    │ 6.22902 │
-│ 6   │ 2.20051 │ 5    │ 8.80749 │
-│ 7   │ 2.69459 │ 3    │ 6.34626 │
-│ 8   │ 2.28902 │ 2    │ 8.72759 │
-│ 9   │ 2.95173 │ 0    │ 5.42517 │
-│ 10  │ 2.35163 │ 4    │ 5.89413 │
-│ 11  │ 2.97614 │ 5    │ 9.99911 │
-│ 12  │ 2.4577  │ 0    │ 8.303   │
+│ Row │ f1      │ f2      │ f3      │
+│     │ Float64 │ Float64 │ Float64 │
+├─────┼─────────┼─────────┼─────────┤
+│ 1   │ 2.04922 │ 5.0     │ 5.72029 │
+│ 2   │ 2.59117 │ 1.0     │ 8.48192 │
+│ 3   │ 2.77148 │ 4.0     │ 5.42517 │
+│ 4   │ 2.25659 │ 5.0     │ 6.75815 │
+│ 5   │ 2.64968 │ 5.0     │ 8.94993 │
+│ 6   │ 2.31523 │ 4.0     │ 5.89413 │
+│ 7   │ 2.86526 │ 3.0     │ 9.8807  │
+│ 8   │ 2.44753 │ -1.0    │ 9.24986 │
+│ 9   │ 2.08284 │ 3.0     │ 9.99911 │
+│ 10  │ 2.81201 │ 2.0     │ 7.28848 │
+│ 11  │ 2.64232 │ 4.0     │ 5.34507 │
+│ 12  │ 2.08189 │ 4.0     │ 8.303   │
 
 ```
 """
 function rand(design::RandomDesign, n::Int = 1)
-    DataFrame(random_design(values(design.factors), n), collect(keys(design.factors)))
+    r_design = zeros(n, length(design.factors))
+    DataFrame(random_design!(r_design,
+                             values(design.factors), n),
+              collect(keys(design.factors)))
 end
 
 

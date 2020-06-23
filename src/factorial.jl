@@ -35,7 +35,7 @@ julia> explicit_fullfactorial(fullfactorial(([-1, 1], [:a, :b, :c])))
 ```
 """
 function explicit_fullfactorial(iterator::Base.Iterators.ProductIterator)
-    permutedims(foldl((x, y) -> hcat(collect(x), collect(y)), iterator))
+    hcat(vcat.(collect(iterator)...)...)
 end
 
 """

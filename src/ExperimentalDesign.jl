@@ -22,7 +22,7 @@ export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
 # Methods
 
 export fullfactorial,  explicit_fullfactorial, plackettburman, isplackettburman,
-    paley, rand, random_design, next_offset_divisible_prime
+    paley, rand, random_design!, next_offset_divisible_prime, kl_exchange, d_criterion
 
 # Pretty printing
 
@@ -32,6 +32,7 @@ include("design.jl")
 include("plackett_burman.jl")
 include("factorial.jl")
 include("random.jl")
+include("kl_exchange.jl")
 include("custom_show.jl")
 
 end
