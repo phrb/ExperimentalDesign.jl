@@ -51,7 +51,7 @@ Factors: (:x1, :x2, :x3, :x4)
 Dummy Factors: (:dummy1, :dummy2, :dummy3)
 Formula: y ~ -1 + x1 + x2 + x3 + x4 + dummy1 + dummy2 + dummy3
 Design Matrix:
-8×7 DataFrames.DataFrame
+8×7 DataFrame
 │ Row │ x1    │ x2    │ x3    │ x4    │ dummy1 │ dummy2 │ dummy3 │
 │     │ Int64 │ Int64 │ Int64 │ Int64 │ Int64  │ Int64  │ Int64  │
 ├─────┼───────┼───────┼───────┼───────┼────────┼────────┼────────┤
@@ -105,7 +105,7 @@ Factors: (:factor1, :factor2, :factor3, :factor4)
 Dummy Factors: (:dummy1, :dummy2, :dummy3)
 Formula: 0 ~ -1 + factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3
 Design Matrix:
-8×7 DataFrames.DataFrame
+8×7 DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │ factor4 │ dummy1 │ dummy2 │ dummy3 │
 │     │ Int64   │ Int64   │ Int64   │ Int64   │ Int64  │ Int64  │ Int64  │
 ├─────┼─────────┼─────────┼─────────┼─────────┼────────┼────────┼────────┤
@@ -161,7 +161,7 @@ Dimension: (12, 3)
 Factors: (A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0])
 Formula: y ~ A + B + C
 Design Matrix:
-12×3 DataFrames.DataFrame
+12×3 DataFrame
 │ Row │ A   │ B   │ C    │
 │     │ Any │ Any │ Any  │
 ├─────┼─────┼─────┼──────┤
@@ -197,7 +197,7 @@ Dimension: (12, 3)
 Factors: (A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0])
 Formula: 0 ~ A + B + C
 Design Matrix:
-12×3 DataFrames.DataFrame
+12×3 DataFrame
 │ Row │ A   │ B   │ C    │
 │     │ Any │ Any │ Any  │
 ├─────┼─────┼─────┼──────┤
@@ -230,7 +230,7 @@ Dimension: (12, 3)
 Factors: (factor1 = [1, 2, 4], factor2 = [:a, :b], factor3 = [1.0, -1.0])
 Formula: 0 ~ factor1 + factor2 + factor3
 Design Matrix:
-12×3 DataFrames.DataFrame
+12×3 DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │
 │     │ Any     │ Any     │ Any     │
 ├─────┼─────────┼─────────┼─────────┤
@@ -263,7 +263,7 @@ Dimension: (8, 3)
 Factors: (factor1 = [-1, 1], factor2 = [-1, 1], factor3 = [-1, 1])
 Formula: 0 ~ factor1 + factor2 + factor3
 Design Matrix:
-8×3 DataFrames.DataFrame
+8×3 DataFrame
 │ Row │ factor1 │ factor2 │ factor3 │
 │     │ Int64   │ Int64   │ Int64   │
 ├─────┼─────────┼─────────┼─────────┤
@@ -405,7 +405,7 @@ Dimension: (12, 3)
 Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0))
 Formula: 0 ~ f1 + f2 + f3
 Design Matrix:
-12×3 DataFrames.DataFrame
+12×3 DataFrame
 │ Row │ f1      │ f2      │ f3      │
 │     │ Float64 │ Float64 │ Float64 │
 ├─────┼─────────┼─────────┼─────────┤
@@ -476,7 +476,7 @@ Formula: 0 ~ f1 + f2 + f3 + :(f2 ^ 2)
 Selected Candidate Rows: [222, 103, 384, 140, 139, 156, 63, 184, 169, 54]
 Optimality Criteria: Dict(:D => 2.418045723405036)
 Design Matrix:
-10×3 DataFrames.DataFrame
+10×3 DataFrame
 │ Row │ f1      │ f2      │ f3      │
 │     │ Float64 │ Float64 │ Float64 │
 ├─────┼─────────┼─────────┼─────────┤

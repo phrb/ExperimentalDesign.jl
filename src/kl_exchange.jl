@@ -84,7 +84,7 @@ julia> d_criterion(selected_rows)
 0.07904918814259465
 
 julia> candidates.matrix[selected_rows.indices[1], :]
-32×30 DataFrames.DataFrame. Omitted printing of 24 columns
+32×30 DataFrame. Omitted printing of 24 columns
 │ Row │ factor1    │ factor2   │ factor3   │ factor4   │ factor5   │ factor6   │
 │     │ Float64    │ Float64   │ Float64   │ Float64   │ Float64   │ Float64   │
 ├─────┼────────────┼───────────┼───────────┼───────────┼───────────┼───────────┤
