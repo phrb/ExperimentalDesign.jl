@@ -14,7 +14,7 @@
                                 design_k = 11,
                                 candidates_l = size(candidates.matrix, 1) - 11)
 
-    @test isapprox(d_criterion(selected_rows), 0.730476820204)
+    @test isapprox(d_criterion(selected_rows), 0.727272727)
 
     Random.seed!(random_seed)
     n_candidates = 3000
