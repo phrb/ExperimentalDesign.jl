@@ -31,7 +31,7 @@ algorithm     leverages    determinant     properties     to    optimize     the
 ```jldoctest
 julia> candidates = FullFactorial(fill([-1, 0, 1], 5));
 
-julia> candidates_formula = ConstantTerm(0) ~ sum(Term.(names(candidates.matrix)));
+julia> candidates_formula = ConstantTerm(0) ~ sum(Term.(Symbol.(names(candidates.matrix))));
 
 julia> candidates_formula = FormulaTerm(candidates_formula.lhs,
                                         candidates_formula.rhs +
