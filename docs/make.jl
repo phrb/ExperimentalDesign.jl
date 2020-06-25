@@ -1,5 +1,7 @@
 using Documenter, ExperimentalDesign
 
+random_seed = 443591
+
 # The DOCSARGS environment variable can be used to pass additional arguments to make.jl.
 # This is useful on CI, if you need to change the behavior of the build slightly but you
 # can not change the .travis.yml or make.jl scripts any more (e.g. for a tag build).
@@ -13,7 +15,7 @@ DocMeta.setdocmeta!(ExperimentalDesign,
                     :DocTestSetup,
                     :(using ExperimentalDesign, Distributions,
                       Random, StatsModels, DataFrames;
-                      Random.seed!(443591););
+                      Random.seed!($random_seed););
                     recursive = true)
 
 if "fixdoctests" in ARGS
