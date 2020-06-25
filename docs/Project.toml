@@ -4,3 +4,10 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
+
+[compat]
+DataFrames = "~0.21"
+Distributions = "~0.23"
+Documenter = "~0.24.6"
+StatsModels = "~0.6.10"
+julia = "~1.4.1"
