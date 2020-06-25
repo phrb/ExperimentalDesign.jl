@@ -18,6 +18,16 @@ end
 """
 $(TYPEDSIGNATURES)
 
+Builds optimum designs using the KL exchange algorithm, as described by Atkinson
+*et al.*.   The ideia is  to iteratively swap  ``K`` design elements  with ``L``
+candidate elements,  in order to  *maximize* an optimality  criterion.  Although
+any criteria based  on information matrices could be used  here, the KL exchange
+algorithm     leverages    determinant     properties     to    optimize     the
+[`d_criterion`](@ref).
+
+> Atkinson, A., Donev, A., & Tobias, R. (2007). Optimum experimental designs, with
+> SAS (Vol. 34). Oxford University Press, Chapter 12.
+
 ```jldoctest
 julia> candidates = FullFactorial(fill([-1, 0, 1], 5));
 
@@ -60,12 +70,12 @@ julia> n_candidates = 3000;
 
 julia> n_factors = 30;
 
-julia> design_generator = RandomDesign(Distributions.Uniform(0, 1), n_factors);
+julia> design_generator = DesignDistribution(Distributions.Uniform(0, 1), n_factors);
 
 julia> candidates = rand(design_generator, n_candidates);
 
-julia> selected_rows = kl_exchange(design_generator.formula,
-                                   candidates,
+julia> selected_rows = kl_exchange(candidates.formula,
+                                   candidates.matrix,
                                    experiments = n_factors + 2,
                                    design_k = n_factors,
                                    candidates_l = round(Int, (n_candidates - n_factors) / 2));
@@ -73,7 +83,7 @@ julia> selected_rows = kl_exchange(design_generator.formula,
 julia> d_criterion(selected_rows)
 0.07904918814259465
 
-julia> candidates[selected_rows.indices[1], :]
+julia> candidates.matrix[selected_rows.indices[1], :]
 32×30 DataFrames.DataFrame. Omitted printing of 24 columns
 │ Row │ factor1    │ factor2   │ factor3   │ factor4   │ factor5   │ factor6   │
 │     │ Float64    │ Float64   │ Float64   │ Float64   │ Float64   │ Float64   │
@@ -98,8 +108,8 @@ julia> candidates[selected_rows.indices[1], :]
 """
 function kl_exchange(formula::FormulaTerm,
                      candidate_set::DataFrame;
-                     tolerance = 1e-9,
-                     seed_design_size = 2,
+                     tolerance::Float64 = 1e-9,
+                     seed_design_size::Int = 2,
                      max_iterations::Int = 1000,
                      experiments::Int,
                      design_k::Int,
@@ -204,7 +214,7 @@ function test()
     n = 50
 
     println("Allocating memory")
-    design_generator = RandomDesign(Distributions.Uniform(0, 1), n)
+    design_generator = DesignDistribution(Distributions.Uniform(0, 1), n)
     @time candidates = rand(design_generator, c)
 
     println("Design created, calling exchange")

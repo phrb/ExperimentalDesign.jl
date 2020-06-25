@@ -4,8 +4,8 @@ function Base.show(io::IO, design::PlackettBurman)
           "Factors: $(design.factors)\n",
           "Dummy Factors: $(design.dummy_factors)\n",
           "Formula: $(design.formula)\n",
-          "Design Matrix:\n",
-          "$(design.matrix)")
+          "Design Matrix:\n")
+    show(io, design.matrix)
 end
 
 function Base.show(io::IO, design::FullFactorial)
@@ -19,12 +19,12 @@ function Base.show(io::IO, design::FullFactorial)
               "Dimension: $(size(design.matrix))\n",
               "Factors: $(design.factors)\n",
               "Formula: $(design.formula)\n",
-              "Design Matrix:\n",
-              "$(design.matrix)")
+              "Design Matrix:\n")
+        show(io, design.matrix)
     end
 end
 
-function Base.show(io::IO, design::RandomDesign)
+function Base.show(io::IO, design::DesignDistribution)
     print(io, "$(typeof(design))\n",
           "Formula: $(design.formula)\n",
           "Factor Distributions:")
@@ -32,4 +32,24 @@ function Base.show(io::IO, design::RandomDesign)
     for factor in keys(design.factors)
         print(io, "\n$(factor): $(design.factors[factor])")
     end
+end
+
+function Base.show(io::IO, design::RandomDesign)
+    print(io, "$(typeof(design))\n",
+          "Dimension: $(size(design.matrix))\n",
+          "Factors: $(design.factors)\n",
+          "Formula: $(design.formula)\n",
+          "Design Matrix:\n")
+    show(io, design.matrix)
+end
+
+function Base.show(io::IO, design::OptimalDesign)
+    print(io, "$(typeof(design))\n",
+          "Dimension: $(size(design.matrix))\n",
+          "Factors: $(design.factors)\n",
+          "Formula: $(design.formula)\n",
+          "Selected Candidate Rows: $(design.selected_experiments)\n",
+          "Optimality Criteria: $(design.criteria)\n",
+          "Design Matrix:\n")
+    show(io, design.matrix)
 end

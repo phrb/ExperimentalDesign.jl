@@ -295,14 +295,26 @@ end
 $(TYPEDEF)
 
 $(TYPEDFIELDS)
-
-Encapsulates a random design generator.  Receives a `NamedTuple` of factor names
-associated  with `Distribution`s  from the  the *Distributions*  package.  After
-instantiating  a  `RandomDesign`,  you  must   request  samples  from  it  using
-[`rand`](@ref).
-
 """
 struct RandomDesign <: AbstractRandomDesign
+    matrix::DataFrame
+    factors::NamedTuple
+    formula::FormulaTerm
+end
+
+"""
+$(TYPEDEF)
+
+$(TYPEDFIELDS)
+
+Encapsulates one or more `Distribution`s, generating random designs.  Receives a
+`NamedTuple`  of  factor names  associated  with  `Distribution`s from  the  the
+*Distributions* package.   After instantiating a `DesignDistribution`,  you must
+request   samples   from   it    using   [`rand`](@ref),   which   generates   a
+[`RandomDesign`](@ref)
+
+"""
+struct DesignDistribution
     factors::NamedTuple
     formula::FormulaTerm
 end
@@ -311,8 +323,8 @@ end
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> RandomDesign((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10)))
-RandomDesign
+julia> DesignDistribution((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10)))
+DesignDistribution
 Formula: 0 ~ f1 + f2 + f3
 Factor Distributions:
 f1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
@@ -321,16 +333,16 @@ f3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
-function RandomDesign(factors::NamedTuple)
-    RandomDesign(factors, ConstantTerm(0) ~ sum(term.(keys(factors))))
+function DesignDistribution(factors::NamedTuple)
+    DesignDistribution(factors, ConstantTerm(0) ~ sum(term.(keys(factors))))
 end
 
 """
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> RandomDesign((Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)))
-RandomDesign
+julia> DesignDistribution((Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)))
+DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3
 Factor Distributions:
 factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
@@ -339,16 +351,16 @@ factor3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
-function RandomDesign(factors::Tuple)
-    RandomDesign(NamedTuple{Tuple(Symbol("factor" * string(i)) for i = 1:length(factors))}(factors))
+function DesignDistribution(factors::Tuple)
+    DesignDistribution(NamedTuple{Tuple(Symbol("factor" * string(i)) for i = 1:length(factors))}(factors))
 end
 
 """
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> RandomDesign([Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)])
-RandomDesign
+julia> DesignDistribution([Distributions.Uniform(2, 3), Distributions.DiscreteUniform(-1, 5), Distributions.Uniform(5, 10)])
+DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3
 Factor Distributions:
 factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
@@ -357,16 +369,16 @@ factor3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
-function RandomDesign(factors::Array)
-    RandomDesign(tuple(factors...))
+function DesignDistribution(factors::Array)
+    DesignDistribution(tuple(factors...))
 end
 
 """
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> RandomDesign(DiscreteNonParametric([-1, 1], [0.5, 0.5]), 6)
-RandomDesign
+julia> DesignDistribution(DiscreteNonParametric([-1, 1], [0.5, 0.5]), 6)
+DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3 + factor4 + factor5 + factor6
 Factor Distributions:
 factor1: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
@@ -378,16 +390,21 @@ factor6: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{
 
 ```
 """
-function RandomDesign(distribution::D, n::Int) where D <: Distribution
+function DesignDistribution(distribution::D, n::Int) where D <: Distribution
     factors = tuple(fill(distribution, n)...)
-    RandomDesign(factors)
+    DesignDistribution(factors)
 end
 
 """
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-julia> rand(RandomDesign((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10))), 12)
+julia> rand(DesignDistribution((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10))), 12)
+ExperimentalDesign.RandomDesign
+Dimension: (12, 3)
+Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0))
+Formula: 0 ~ f1 + f2 + f3
+Design Matrix:
 12×3 DataFrames.DataFrame
 │ Row │ f1      │ f2      │ f3      │
 │     │ Float64 │ Float64 │ Float64 │
@@ -407,22 +424,97 @@ julia> rand(RandomDesign((f1 = Distributions.Uniform(2, 3), f2 = Distributions.D
 
 ```
 """
-function rand(design::RandomDesign, n::Int = 1)
-    r_design = zeros(n, length(design.factors))
-    DataFrame(random_design!(r_design,
-                             values(design.factors), n),
-              collect(keys(design.factors)))
+function rand(distribution::DesignDistribution, n::Int = 1)
+    r_design = zeros(n, length(distribution.factors))
+    RandomDesign(DataFrame(random_design!(r_design,
+                                          values(distribution.factors), n),
+                           collect(keys(distribution.factors))),
+                 distribution.factors,
+                 distribution.formula)
 end
-
 
 """
 $(TYPEDEF)
 
 $(TYPEDFIELDS)
+
+Contains a  set of candidate experiments,  a target optimality criterion,  and a
+model prior  formula.  A set  of experiments  that maximizes a  given optimality
+criterion can selected from a candidate set using the [`kl_exchange`](@ref)
+algorithm.
+
 """
 struct OptimalDesign <: AbstractOptimalDesign
     matrix::DataFrame
-    candidates::AbstractDesign
-    criteria::Dict{Symbol, Float64}
+    factors::NamedTuple
     formula::FormulaTerm
+    selected_experiments::Array{Int}
+    criteria::Dict{Symbol, Float64}
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> design_distribution = DesignDistribution((f1 = Distributions.Uniform(2, 3), f2 = Distributions.DiscreteUniform(-1, 5), f3 = Distributions.Uniform(5, 10)))
+DesignDistribution
+Formula: 0 ~ f1 + f2 + f3
+Factor Distributions:
+f1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
+f2: Distributions.DiscreteUniform(a=-1, b=5)
+f3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
+
+julia> design = rand(design_distribution, 400);
+
+julia> f = @formula 0 ~ f1 + f2 + f3 + f2 ^ 2;
+
+julia> OptimalDesign(design, f, 10)
+OptimalDesign
+Dimension: (10, 3)
+Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0))
+Formula: 0 ~ f1 + f2 + f3 + :(f2 ^ 2)
+Selected Candidate Rows: [222, 103, 384, 140, 139, 156, 63, 184, 169, 54]
+Optimality Criteria: Dict(:D => 2.418045723405036)
+Design Matrix:
+10×3 DataFrames.DataFrame
+│ Row │ f1      │ f2      │ f3      │
+│     │ Float64 │ Float64 │ Float64 │
+├─────┼─────────┼─────────┼─────────┤
+│ 1   │ 2.02407 │ -1.0    │ 5.07959 │
+│ 2   │ 2.0203  │ 5.0     │ 9.50193 │
+│ 3   │ 2.80676 │ -1.0    │ 9.87726 │
+│ 4   │ 2.9996  │ 2.0     │ 5.03174 │
+│ 5   │ 2.14846 │ 2.0     │ 9.72596 │
+│ 6   │ 2.84392 │ 5.0     │ 5.01213 │
+│ 7   │ 2.04046 │ 2.0     │ 5.00331 │
+│ 8   │ 2.93432 │ 1.0     │ 9.71405 │
+│ 9   │ 2.79858 │ -1.0    │ 5.35685 │
+│ 10  │ 2.97635 │ 5.0     │ 8.10695 │
+
+```
+"""
+function OptimalDesign(candidates::AbstractDesign,
+                       formula::FormulaTerm,
+                       experiments::Int;
+                       tolerance::Float64 = 1e-9,
+                       seed_design_size::Int = 2,
+                       max_iterations::Int = 1000,
+                       design_k::Int = experiments,
+                       candidates_l::Int = size(candidates.matrix, 1) - design_k)
+    selected = kl_exchange(formula,
+                           candidates.matrix,
+                           experiments = experiments,
+                           tolerance = tolerance,
+                           seed_design_size = seed_design_size,
+                           max_iterations = max_iterations,
+                           design_k = design_k,
+                           candidates_l = candidates_l)
+
+    optimality = d_criterion(selected)
+
+    OptimalDesign(candidates.matrix[selected.indices[1], :],
+                  candidates.factors,
+                  formula,
+                  selected.indices[1],
+                  Dict(:D => optimality))
 end
