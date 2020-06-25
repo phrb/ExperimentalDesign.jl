@@ -28,7 +28,7 @@ algorithm     leverages    determinant     properties     to    optimize     the
 > Atkinson, A., Donev, A., & Tobias, R. (2007). Optimum experimental designs, with
 > SAS (Vol. 34). Oxford University Press, Chapter 12.
 
-```jldoctest
+```julia
 julia> candidates = FullFactorial(fill([-1, 0, 1], 5));
 
 julia> candidates_formula = ConstantTerm(0) ~ sum(Term.(names(candidates.matrix)));
@@ -65,7 +65,7 @@ julia> candidates.matrix[selected_rows.indices[1], :]
 │ 11  │ 1       │ -1      │ -1      │ -1      │ -1      │
 ```
 
-```jldoctest
+```julia
 julia> n_candidates = 3000;
 
 julia> n_factors = 30;
