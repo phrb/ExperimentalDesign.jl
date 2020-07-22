@@ -327,9 +327,9 @@ julia> DesignDistribution((f1 = Uniform(2, 3), f2 = DiscreteUniform(-1, 5), f3 =
 DesignDistribution
 Formula: 0 ~ f1 + f2 + f3
 Factor Distributions:
-f1: Uniform{Float64}(a=2.0, b=3.0)
-f2: DiscreteUniform(a=-1, b=5)
-f3: Uniform{Float64}(a=5.0, b=10.0)
+f1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
+f2: Distributions.DiscreteUniform(a=-1, b=5)
+f3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
@@ -345,9 +345,9 @@ julia> DesignDistribution((Uniform(2, 3), DiscreteUniform(-1, 5), Uniform(5, 10)
 DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3
 Factor Distributions:
-factor1: Uniform{Float64}(a=2.0, b=3.0)
-factor2: DiscreteUniform(a=-1, b=5)
-factor3: Uniform{Float64}(a=5.0, b=10.0)
+factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
+factor2: Distributions.DiscreteUniform(a=-1, b=5)
+factor3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
@@ -363,9 +363,9 @@ julia> DesignDistribution([Uniform(2, 3), DiscreteUniform(-1, 5), Uniform(5, 10)
 DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3
 Factor Distributions:
-factor1: Uniform{Float64}(a=2.0, b=3.0)
-factor2: DiscreteUniform(a=-1, b=5)
-factor3: Uniform{Float64}(a=5.0, b=10.0)
+factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
+factor2: Distributions.DiscreteUniform(a=-1, b=5)
+factor3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
@@ -381,12 +381,12 @@ julia> DesignDistribution(DiscreteNonParametric([-1, 1], [0.5, 0.5]), 6)
 DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3 + factor4 + factor5 + factor6
 Factor Distributions:
-factor1: DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor2: DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor3: DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor4: DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor5: DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor6: DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor1: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor2: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor3: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor4: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor5: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor6: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
 
 ```
 """
@@ -402,7 +402,7 @@ $(TYPEDSIGNATURES)
 julia> rand(DesignDistribution((f1 = Uniform(2, 3), f2 = DiscreteUniform(-1, 5), f3 = Uniform(5, 10))), 12)
 ExperimentalDesign.RandomDesign
 Dimension: (12, 3)
-Factors: (f1 = Uniform{Float64}(a=2.0, b=3.0), f2 = DiscreteUniform(a=-1, b=5), f3 = Uniform{Float64}(a=5.0, b=10.0))
+Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0))
 Formula: 0 ~ f1 + f2 + f3
 Design Matrix:
 12×3 DataFrame
@@ -460,9 +460,9 @@ julia> design_distribution = DesignDistribution((f1 = Uniform(2, 3), f2 = Discre
 DesignDistribution
 Formula: 0 ~ f1 + f2 + f3
 Factor Distributions:
-f1: Uniform{Float64}(a=2.0, b=3.0)
-f2: DiscreteUniform(a=-1, b=5)
-f3: Uniform{Float64}(a=5.0, b=10.0)
+f1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
+f2: Distributions.DiscreteUniform(a=-1, b=5)
+f3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
 
 julia> design = rand(design_distribution, 400);
 
@@ -471,7 +471,7 @@ julia> f = @formula 0 ~ f1 + f2 + f3 + f2 ^ 2;
 julia> OptimalDesign(design, f, 10)
 OptimalDesign
 Dimension: (10, 3)
-Factors: (f1 = Uniform{Float64}(a=2.0, b=3.0), f2 = DiscreteUniform(a=-1, b=5), f3 = Uniform{Float64}(a=5.0, b=10.0))
+Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0))
 Formula: 0 ~ f1 + f2 + f3 + :(f2 ^ 2)
 Selected Candidate Rows: [222, 103, 384, 140, 139, 156, 63, 184, 169, 54]
 Optimality Criteria: Dict(:D => 2.418045723405036)
