@@ -7,6 +7,9 @@ julia:
 os:
   - linux
 
+arch:
+  - amd64
+
 notifications:
   email: false
 
@@ -16,8 +19,9 @@ after_success:
 jobs:
   include:
     - stage: "Documentation"
+      julia: 1.4.1
+      os: linux
       script:
-        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
-                                    Pkg.instantiate()'
+        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
       after_success: skip
