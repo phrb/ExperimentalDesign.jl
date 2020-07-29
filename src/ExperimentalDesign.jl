@@ -17,7 +17,7 @@ import Random: rand
 
 export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
     AbstractOptimalDesign,  PlackettBurman, FullFactorial,  FractionalFactorial,
-    OptimalDesign, DesignDistribution
+    OptimalDesign, DesignDistribution, CategoricalFactor
 
 # Methods
 
@@ -34,5 +34,6 @@ include("factorial.jl")
 include("random.jl")
 include("kl_exchange.jl")
 include("custom_show.jl")
+include("categorical.jl")
 
 end
