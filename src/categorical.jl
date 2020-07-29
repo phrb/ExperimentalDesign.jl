@@ -7,7 +7,7 @@ A simple wrapper for a `DiscreteUniform` distribution over non-numerical arrays.
 
 """
 struct CategoricalFactor <: DiscreteUnivariateDistribution
-    values::Array{Any, 1}
+    values::Array{N, 1} where N
     distribution::DiscreteUniform
 end
 
@@ -23,7 +23,7 @@ distribution: Distributions.DiscreteUniform(a=1, b=4)
 
 ```
 """
-function CategoricalFactor(values::Array{Any, 1})
+function CategoricalFactor(values::Array{N, 1}) where N
     CategoricalFactor(values, DiscreteUniform(1, length(values)))
 end
 

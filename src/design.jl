@@ -425,9 +425,7 @@ Design Matrix:
 ```
 """
 function rand(distribution::DesignDistribution, n::Int = 1)
-    r_design = zeros(n, length(distribution.factors))
-    RandomDesign(DataFrame(random_design!(r_design,
-                                          values(distribution.factors), n),
+    RandomDesign(DataFrame(random_design!(values(distribution.factors), n),
                            collect(keys(distribution.factors))),
                  distribution.factors,
                  distribution.formula)
