@@ -19,7 +19,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 DataFrames = "~0.21.7"
-Distributions = "~0.23.10"
+Distributions = "~0.23.10, 0.25"
 DocStringExtensions = "~0.8.3"
 Documenter = "~0.24.11"
 GLM = "~1.3.10"
