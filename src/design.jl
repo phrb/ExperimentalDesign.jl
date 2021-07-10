@@ -11,6 +11,11 @@ abstract type AbstractScreeningDesign <: AbstractDesign end
 """
 $(TYPEDEF)
 """
+abstract type AbstractResponseSurfaceDesign <: AbstractDesign end
+
+"""
+$(TYPEDEF)
+"""
 abstract type AbstractFactorialDesign <: AbstractDesign end
 
 """
@@ -124,6 +129,84 @@ function PlackettBurman(factors::Int)
     PlackettBurman(ConstantTerm(0) ~ sum(term.(Symbol("factor" * string(i)) for i = 1:factors)))
 end
 
+"""
+$(TYPEDEF)
+
+Box-Behnken design for response surface methodology
+
+$(TYPEDFIELDS)
+"""
+struct BoxBehnken <: AbstractResponseSurfaceDesign
+    matrix::DataFrame
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> BoxBehnken(4)
+BoxBehnken(27×4 DataFrame
+│ Row │ x1      │ x2      │ x3      │ x4      │
+│     │ Float64 │ Float64 │ Float64 │ Float64 │
+├─────┼─────────┼─────────┼─────────┼─────────┤
+│ 1   │ -1.0    │ -1.0    │ 0.0     │ 0.0     │
+│ 2   │ 1.0     │ -1.0    │ 0.0     │ 0.0     │
+│ 3   │ -1.0    │ 1.0     │ 0.0     │ 0.0     │
+│ 4   │ 1.0     │ 1.0     │ 0.0     │ 0.0     │
+│ 5   │ -1.0    │ 0.0     │ -1.0    │ 0.0     │
+│ 6   │ 1.0     │ 0.0     │ -1.0    │ 0.0     │
+│ 7   │ -1.0    │ 0.0     │ 1.0     │ 0.0     │
+│ 8   │ 1.0     │ 0.0     │ 1.0     │ 0.0     │
+⋮
+│ 19  │ 0.0     │ -1.0    │ 0.0     │ 1.0     │
+│ 20  │ 0.0     │ 1.0     │ 0.0     │ 1.0     │
+│ 21  │ 0.0     │ 0.0     │ -1.0    │ -1.0    │
+│ 22  │ 0.0     │ 0.0     │ 1.0     │ -1.0    │
+│ 23  │ 0.0     │ 0.0     │ -1.0    │ 1.0     │
+│ 24  │ 0.0     │ 0.0     │ 1.0     │ 1.0     │
+│ 25  │ 0.0     │ 0.0     │ 0.0     │ 0.0     │
+│ 26  │ 0.0     │ 0.0     │ 0.0     │ 0.0     │
+│ 27  │ 0.0     │ 0.0     │ 0.0     │ 0.0     │)
+```
+"""
+function BoxBehnken(factors::Int)
+    design = DataFrame(boxbehnken(factors))
+    BoxBehnken(design)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> BoxBehnken(4,0)
+BoxBehnken(24×4 DataFrame
+│ Row │ x1      │ x2      │ x3      │ x4      │
+│     │ Float64 │ Float64 │ Float64 │ Float64 │
+├─────┼─────────┼─────────┼─────────┼─────────┤
+│ 1   │ -1.0    │ -1.0    │ 0.0     │ 0.0     │
+│ 2   │ 1.0     │ -1.0    │ 0.0     │ 0.0     │
+│ 3   │ -1.0    │ 1.0     │ 0.0     │ 0.0     │
+│ 4   │ 1.0     │ 1.0     │ 0.0     │ 0.0     │
+│ 5   │ -1.0    │ 0.0     │ -1.0    │ 0.0     │
+│ 6   │ 1.0     │ 0.0     │ -1.0    │ 0.0     │
+│ 7   │ -1.0    │ 0.0     │ 1.0     │ 0.0     │
+│ 8   │ 1.0     │ 0.0     │ 1.0     │ 0.0     │
+⋮
+│ 16  │ 0.0     │ 1.0     │ 1.0     │ 0.0     │
+│ 17  │ 0.0     │ -1.0    │ 0.0     │ -1.0    │
+│ 18  │ 0.0     │ 1.0     │ 0.0     │ -1.0    │
+│ 19  │ 0.0     │ -1.0    │ 0.0     │ 1.0     │
+│ 20  │ 0.0     │ 1.0     │ 0.0     │ 1.0     │
+│ 21  │ 0.0     │ 0.0     │ -1.0    │ -1.0    │
+│ 22  │ 0.0     │ 0.0     │ 1.0     │ -1.0    │
+│ 23  │ 0.0     │ 0.0     │ -1.0    │ 1.0     │
+│ 24  │ 0.0     │ 0.0     │ 1.0     │ 1.0     │)
+```
+"""
+function BoxBehnken(factors::Int, center::Int)
+    design = DataFrame(boxbehnken(factors, center))
+    BoxBehnken(design)
+end
 """
 $(TYPEDEF)
 
