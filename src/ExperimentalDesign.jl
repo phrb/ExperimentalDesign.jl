@@ -21,7 +21,7 @@ export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
 
 # Methods
 
-export fullfactorial,  explicit_fullfactorial, plackettburman, isplackettburman,
+export fullfactorial,  explicit_fullfactorial, plackettburman, fold!, isplackettburman,
     paley, rand, random_design!, next_offset_divisible_prime, kl_exchange, d_criterion
 
 # Pretty printing
