@@ -1,4 +1,19 @@
 """
+
+This code is based on the original work on the Scilab DoE package by the
+following individuals
+    Copyright (C) 2012 - 2013 - Michael Baudin
+    Copyright (C) 2012 - Maria Christopoulou
+    Copyright (C) 2010 - 2011 - INRIA - Michael Baudin
+    Copyright (C) 2009 - Yann Collette
+    Copyright (C) 2009 - CEA - Jean-Marc Martinez
+and
+    Copyright (C) 2014, Abraham D. Lee
+who converted the package to Python.
+"""
+
+
+"""
 $(TYPEDSIGNATURES)
 
 Constructs a Box-Behnken design with size `matrix_size`.

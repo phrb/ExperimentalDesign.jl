@@ -132,7 +132,7 @@ end
 """
 $(TYPEDEF)
 
-Box-Behnken design for response surface methodology
+Box-Behnken design for response surface methodology.
 
 $(TYPEDFIELDS)
 """
@@ -146,9 +146,35 @@ end
 $(TYPEDSIGNATURES)
 
 ```jldoctest
+julia> BoxBehnken(@formula( y ~ -1 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3 + factor1 + factor2 + factor3), center=3)
+BoxBehnken
+Dimension: (15, 3)
+Factors: (:factor1, :factor2, :factor3)
+Formula: y ~ -1 + factor1 + factor2 + factor3 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3
+Design Matrix:
+15×3 DataFrame
+ Row │ factor1  factor2  factor3 
+     │ Float64  Float64  Float64 
+─────┼───────────────────────────
+   1 │    -1.0     -1.0      0.0
+   2 │     1.0     -1.0      0.0
+   3 │    -1.0      1.0      0.0
+   4 │     1.0      1.0      0.0
+   5 │    -1.0      0.0     -1.0
+   6 │     1.0      0.0     -1.0
+   7 │    -1.0      0.0      1.0
+   8 │     1.0      0.0      1.0
+   9 │     0.0     -1.0     -1.0
+  10 │     0.0      1.0     -1.0
+  11 │     0.0     -1.0      1.0
+  12 │     0.0      1.0      1.0
+  13 │     0.0      0.0      0.0
+  14 │     0.0      0.0      0.0
+  15 │     0.0      0.0      0.0
+
 ```
 """
-function BoxBehnken(formula::FormulaTerm; center::Int=1, symbol_encoding::Bool = false)
+function BoxBehnken(formula::FormulaTerm; center::Int=1)
     symbol_factors_array = []
     # TODO can only handle interaction terms not functional terms
     for r in formula.rhs
@@ -163,63 +189,52 @@ function BoxBehnken(formula::FormulaTerm; center::Int=1, symbol_encoding::Bool =
     symbol_factors = Tuple(unique!(symbol_factors_array))
 
     initial_design = boxbehnken(length(symbol_factors_array), center)
-    categorical_design = similar(initial_design, Symbol)
-
-    if symbol_encoding
-        for i = 1:size(initial_design, 1), j = 1:size(initial_design, 2)
-            categorical_design[i, j] = initial_design[i, j] == 1.0 ? :high : :low
-        end
-
-        design = DataFrame(categorical_design)
-    else
-        design = DataFrame(initial_design)
-    end
+    design = DataFrame(initial_design, :auto)
 
     rename!(design, collect(symbol_factors))
 
-    BoxBehnken(design,
-                   symbol_factors,
-                   formula)
+    BoxBehnken(design, symbol_factors, formula)
 end
 
 """
 $(TYPEDSIGNATURES)
 
 ```jldoctest
-BoxBehnken(3, center=3, symbol_encoding=true)
+julia> BoxBehnken(3, center=3)
 BoxBehnken
 Dimension: (15, 3)
 Factors: (:factor1, :factor2, :factor3)
 Formula: y ~ -1 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3 + factor1 + factor2 + factor3
 Design Matrix:
 15×3 DataFrame
-│ Row │ factor1 │ factor2 │ factor3 │
-│     │ Symbol  │ Symbol  │ Symbol  │
-├─────┼─────────┼─────────┼─────────┤
-│ 1   │ low     │ low     │ low     │
-│ 2   │ high    │ low     │ low     │
-│ 3   │ low     │ high    │ low     │
-│ 4   │ high    │ high    │ low     │
-│ 5   │ low     │ low     │ low     │
-│ 6   │ high    │ low     │ low     │
-│ 7   │ low     │ low     │ high    │
-│ 8   │ high    │ low     │ high    │
-│ 9   │ low     │ low     │ low     │
-│ 10  │ low     │ high    │ low     │
-│ 11  │ low     │ low     │ high    │
-│ 12  │ low     │ high    │ high    │
-│ 13  │ low     │ low     │ low     │
-│ 14  │ low     │ low     │ low     │
-│ 15  │ low     │ low     │ low     │
+ Row │ factor1  factor2  factor3 
+     │ Float64  Float64  Float64 
+─────┼───────────────────────────
+   1 │    -1.0     -1.0      0.0
+   2 │     1.0     -1.0      0.0
+   3 │    -1.0      1.0      0.0
+   4 │     1.0      1.0      0.0
+   5 │    -1.0      0.0     -1.0
+   6 │     1.0      0.0     -1.0
+   7 │    -1.0      0.0      1.0
+   8 │     1.0      0.0      1.0
+   9 │     0.0     -1.0     -1.0
+  10 │     0.0      1.0     -1.0
+  11 │     0.0     -1.0      1.0
+  12 │     0.0      1.0      1.0
+  13 │     0.0      0.0      0.0
+  14 │     0.0      0.0      0.0
+  15 │     0.0      0.0      0.0
+
 ```
 """
-function BoxBehnken(factors::Int; center::Int=1, symbol_encoding::Bool = false)
+function BoxBehnken(factors::Int; center::Int=1)
     factors_tuple = Tuple(Symbol("factor" * string(i)) for i = 1:factors)
     q_terms = sum(InteractionTerm(term.((only(x),only(x)))) for x ∈ combinations(factors_tuple, 1))
     i_terms = sum((&)(term.(x)...) for x ∈ combinations(factors_tuple, 2))
     l_terms = sum(term(only(x)) for x ∈ combinations(factors_tuple, 1))
     formula = term(:y) ~ term(-1) + q_terms + i_terms + l_terms
-    BoxBehnken(formula, center=center, symbol_encoding=symbol_encoding)
+    BoxBehnken(formula, center=center)
 end
 
 """
