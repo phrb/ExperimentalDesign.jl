@@ -3,6 +3,7 @@
 module ExperimentalDesign
 
 using Random
+using Combinatorics
 using Logging
 using Primes
 using DataFrames
