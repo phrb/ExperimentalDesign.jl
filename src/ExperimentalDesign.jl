@@ -10,6 +10,7 @@ using Distributions
 using StatsModels
 using DocStringExtensions
 using LinearAlgebra
+using LatinHypercubeSampling
 
 import Random: rand
 
@@ -17,7 +18,7 @@ import Random: rand
 
 export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
     AbstractOptimalDesign,  PlackettBurman, FullFactorial,  FractionalFactorial,
-    OptimalDesign, DesignDistribution, CategoricalFactor
+    OptimalDesign, DesignDistribution, CategoricalFactor, RandomLHCDesign, OptimLHCDesign
 
 # Methods
 

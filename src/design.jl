@@ -435,6 +435,80 @@ end
 $(TYPEDEF)
 
 $(TYPEDFIELDS)
+"""
+struct RandomLHCDesign <: AbstractRandomDesign
+    matrix::DataFrame
+    factors::Tuple
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+```
+"""
+function RandomLHCDesign(n::Int, d::Int)
+    factors = Tuple(Symbol("factor" * string(i)) for i = 1:d)
+    design = DataFrame(randomLHC(n,d))
+    rename!(design, collect(factors))
+    RandomLHCDesign(design, factors)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+```
+"""
+function RandomLHCDesign(n::Int, factors::Tuple)
+    design = DataFrame(randomLHC(n,length(factors)))
+    rename!(design, collect(factors))
+    RandomLHCDesign(design, factors)
+end
+
+
+"""
+$(TYPEDEF)
+
+$(TYPEDFIELDS)
+"""
+struct OptimLHCDesign <: AbstractRandomDesign
+    matrix::DataFrame
+    factors::Tuple
+    fitness::Any
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+```
+"""
+function OptimLHCDesign(n::Int, d::Int, gens)
+    factors = Tuple(Symbol("factor" * string(i)) for i = 1:d)
+    design_matrix, fitness = LHCoptim(n, d, gens)
+    design = DataFrame(design_matrix)
+    rename!(design, collect(factors))
+    OptimLHCDesign(design, factors, fitness)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+```
+"""
+function OptimLHCDesign(n::Int, factors::Tuple, gens)
+    design_matrix, fitness = LHCoptim(n, length(factors), gens)
+    design = DataFrame(design_matrix)
+    rename!(design, collect(factors))
+    OptimLHCDesign(design, factors, fitness)
+end
+
+"""
+$(TYPEDEF)
+
+$(TYPEDFIELDS)
 
 Contains a  set of candidate experiments,  a target optimality criterion,  and a
 model prior  formula.  A set  of experiments  that maximizes a  given optimality
