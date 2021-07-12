@@ -16,7 +16,7 @@ import Random: rand
 # Types
 
 export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
-    AbstractOptimalDesign,  PlackettBurman, FullFactorial,  FractionalFactorial,
+    AbstractOptimalDesign,  PlackettBurman, FullFactorial,  FractionalFactorial2Level,
     OptimalDesign, DesignDistribution, CategoricalFactor
 
 # Methods
