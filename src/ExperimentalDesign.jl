@@ -35,5 +35,6 @@ include("random.jl")
 include("kl_exchange.jl")
 include("custom_show.jl")
 include("categorical.jl")
+include("fold.jl")
 
 end
