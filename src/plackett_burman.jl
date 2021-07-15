@@ -73,7 +73,7 @@ method for constructing Hadamard matrices using finite fields.
 
 ```jldoctest
 julia> paley(Matrix{Int}(undef, 8, 8))
-8×8 Array{Int64,2}:
+8×8 Matrix{Int64}:
  -1   1   1  -1   1   1   1  -1
   1   1  -1   1   1   1  -1  -1
   1  -1   1   1   1  -1  -1   1
@@ -127,7 +127,7 @@ the closest, largest, number for which it is possible.
 
 ```jldoctest
 julia> plackettburman(4)
-8×7 Array{Int64,2}:
+8×7 Matrix{Int64}:
   1   1   1   1   1   1   1
  -1   1  -1   1   1  -1  -1
   1  -1   1   1  -1  -1  -1

@@ -52,17 +52,17 @@ Dummy Factors: (:dummy1, :dummy2, :dummy3)
 Formula: y ~ -1 + x1 + x2 + x3 + x4 + dummy1 + dummy2 + dummy3
 Design Matrix:
 8×7 DataFrame
-│ Row │ x1    │ x2    │ x3    │ x4    │ dummy1 │ dummy2 │ dummy3 │
-│     │ Int64 │ Int64 │ Int64 │ Int64 │ Int64  │ Int64  │ Int64  │
-├─────┼───────┼───────┼───────┼───────┼────────┼────────┼────────┤
-│ 1   │ 1     │ 1     │ 1     │ 1     │ 1      │ 1      │ 1      │
-│ 2   │ -1    │ 1     │ -1    │ 1     │ 1      │ -1     │ -1     │
-│ 3   │ 1     │ -1    │ 1     │ 1     │ -1     │ -1     │ -1     │
-│ 4   │ -1    │ 1     │ 1     │ -1    │ -1     │ -1     │ 1      │
-│ 5   │ 1     │ 1     │ -1    │ -1    │ -1     │ 1      │ -1     │
-│ 6   │ 1     │ -1    │ -1    │ -1    │ 1      │ -1     │ 1      │
-│ 7   │ -1    │ -1    │ -1    │ 1     │ -1     │ 1      │ 1      │
-│ 8   │ -1    │ -1    │ 1     │ -1    │ 1      │ 1      │ -1     │
+ Row │ x1     x2     x3     x4     dummy1  dummy2  dummy3
+     │ Int64  Int64  Int64  Int64  Int64   Int64   Int64
+─────┼────────────────────────────────────────────────────
+   1 │     1      1      1      1       1       1       1
+   2 │    -1      1     -1      1       1      -1      -1
+   3 │     1     -1      1      1      -1      -1      -1
+   4 │    -1      1      1     -1      -1      -1       1
+   5 │     1      1     -1     -1      -1       1      -1
+   6 │     1     -1     -1     -1       1      -1       1
+   7 │    -1     -1     -1      1      -1       1       1
+   8 │    -1     -1      1     -1       1       1      -1
 
 ```
 """
@@ -77,9 +77,9 @@ function PlackettBurman(formula::FormulaTerm; symbol_encoding::Bool = false)
             categorical_design[i, j] = initial_design[i, j] == 1.0 ? :high : :low
         end
 
-        design = DataFrame(categorical_design)
+        design = DataFrame(categorical_design, :auto)
     else
-        design = DataFrame(initial_design)
+        design = DataFrame(initial_design, :auto)
     end
 
     dummy_factors = Tuple(Symbol("dummy" * string(i)) for i = 1:(length(names(design)) -
@@ -106,17 +106,17 @@ Dummy Factors: (:dummy1, :dummy2, :dummy3)
 Formula: 0 ~ -1 + factor1 + factor2 + factor3 + factor4 + dummy1 + dummy2 + dummy3
 Design Matrix:
 8×7 DataFrame
-│ Row │ factor1 │ factor2 │ factor3 │ factor4 │ dummy1 │ dummy2 │ dummy3 │
-│     │ Int64   │ Int64   │ Int64   │ Int64   │ Int64  │ Int64  │ Int64  │
-├─────┼─────────┼─────────┼─────────┼─────────┼────────┼────────┼────────┤
-│ 1   │ 1       │ 1       │ 1       │ 1       │ 1      │ 1      │ 1      │
-│ 2   │ -1      │ 1       │ -1      │ 1       │ 1      │ -1     │ -1     │
-│ 3   │ 1       │ -1      │ 1       │ 1       │ -1     │ -1     │ -1     │
-│ 4   │ -1      │ 1       │ 1       │ -1      │ -1     │ -1     │ 1      │
-│ 5   │ 1       │ 1       │ -1      │ -1      │ -1     │ 1      │ -1     │
-│ 6   │ 1       │ -1      │ -1      │ -1      │ 1      │ -1     │ 1      │
-│ 7   │ -1      │ -1      │ -1      │ 1       │ -1     │ 1      │ 1      │
-│ 8   │ -1      │ -1      │ 1       │ -1      │ 1      │ 1      │ -1     │
+ Row │ factor1  factor2  factor3  factor4  dummy1  dummy2  dummy3
+     │ Int64    Int64    Int64    Int64    Int64   Int64   Int64
+─────┼────────────────────────────────────────────────────────────
+   1 │       1        1        1        1       1       1       1
+   2 │      -1        1       -1        1       1      -1      -1
+   3 │       1       -1        1        1      -1      -1      -1
+   4 │      -1        1        1       -1      -1      -1       1
+   5 │       1        1       -1       -1      -1       1      -1
+   6 │       1       -1       -1       -1       1      -1       1
+   7 │      -1       -1       -1        1      -1       1       1
+   8 │      -1       -1        1       -1       1       1      -1
 
 ```
 """
@@ -162,27 +162,27 @@ Factors: (A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0])
 Formula: y ~ A + B + C
 Design Matrix:
 12×3 DataFrame
-│ Row │ A   │ B   │ C    │
-│     │ Any │ Any │ Any  │
-├─────┼─────┼─────┼──────┤
-│ 1   │ 1   │ a   │ 1.0  │
-│ 2   │ 2   │ a   │ 1.0  │
-│ 3   │ 4   │ a   │ 1.0  │
-│ 4   │ 1   │ b   │ 1.0  │
-│ 5   │ 2   │ b   │ 1.0  │
-│ 6   │ 4   │ b   │ 1.0  │
-│ 7   │ 1   │ a   │ -1.0 │
-│ 8   │ 2   │ a   │ -1.0 │
-│ 9   │ 4   │ a   │ -1.0 │
-│ 10  │ 1   │ b   │ -1.0 │
-│ 11  │ 2   │ b   │ -1.0 │
-│ 12  │ 4   │ b   │ -1.0 │
+ Row │ A    B    C
+     │ Any  Any  Any
+─────┼────────────────
+   1 │ 1    a    1.0
+   2 │ 2    a    1.0
+   3 │ 4    a    1.0
+   4 │ 1    b    1.0
+   5 │ 2    b    1.0
+   6 │ 4    b    1.0
+   7 │ 1    a    -1.0
+   8 │ 2    a    -1.0
+   9 │ 4    a    -1.0
+  10 │ 1    b    -1.0
+  11 │ 2    b    -1.0
+  12 │ 4    b    -1.0
 
 ```
 """
 function FullFactorial(factors::NamedTuple, formula::FormulaTerm)
     iterator = fullfactorial(values(factors))
-    matrix = DataFrame(explicit_fullfactorial(iterator))
+    matrix = DataFrame(explicit_fullfactorial(iterator), :auto)
     rename!(matrix, [r.sym for r in formula.rhs])
     FullFactorial(matrix, factors, formula)
 end
@@ -198,21 +198,21 @@ Factors: (A = [1, 2, 4], B = [:a, :b], C = [1.0, -1.0])
 Formula: 0 ~ A + B + C
 Design Matrix:
 12×3 DataFrame
-│ Row │ A   │ B   │ C    │
-│     │ Any │ Any │ Any  │
-├─────┼─────┼─────┼──────┤
-│ 1   │ 1   │ a   │ 1.0  │
-│ 2   │ 2   │ a   │ 1.0  │
-│ 3   │ 4   │ a   │ 1.0  │
-│ 4   │ 1   │ b   │ 1.0  │
-│ 5   │ 2   │ b   │ 1.0  │
-│ 6   │ 4   │ b   │ 1.0  │
-│ 7   │ 1   │ a   │ -1.0 │
-│ 8   │ 2   │ a   │ -1.0 │
-│ 9   │ 4   │ a   │ -1.0 │
-│ 10  │ 1   │ b   │ -1.0 │
-│ 11  │ 2   │ b   │ -1.0 │
-│ 12  │ 4   │ b   │ -1.0 │
+ Row │ A    B    C
+     │ Any  Any  Any
+─────┼────────────────
+   1 │ 1    a    1.0
+   2 │ 2    a    1.0
+   3 │ 4    a    1.0
+   4 │ 1    b    1.0
+   5 │ 2    b    1.0
+   6 │ 4    b    1.0
+   7 │ 1    a    -1.0
+   8 │ 2    a    -1.0
+   9 │ 4    a    -1.0
+  10 │ 1    b    -1.0
+  11 │ 2    b    -1.0
+  12 │ 4    b    -1.0
 
 ```
 """
@@ -231,21 +231,21 @@ Factors: (factor1 = [1, 2, 4], factor2 = [:a, :b], factor3 = [1.0, -1.0])
 Formula: 0 ~ factor1 + factor2 + factor3
 Design Matrix:
 12×3 DataFrame
-│ Row │ factor1 │ factor2 │ factor3 │
-│     │ Any     │ Any     │ Any     │
-├─────┼─────────┼─────────┼─────────┤
-│ 1   │ 1       │ a       │ 1.0     │
-│ 2   │ 2       │ a       │ 1.0     │
-│ 3   │ 4       │ a       │ 1.0     │
-│ 4   │ 1       │ b       │ 1.0     │
-│ 5   │ 2       │ b       │ 1.0     │
-│ 6   │ 4       │ b       │ 1.0     │
-│ 7   │ 1       │ a       │ -1.0    │
-│ 8   │ 2       │ a       │ -1.0    │
-│ 9   │ 4       │ a       │ -1.0    │
-│ 10  │ 1       │ b       │ -1.0    │
-│ 11  │ 2       │ b       │ -1.0    │
-│ 12  │ 4       │ b       │ -1.0    │
+ Row │ factor1  factor2  factor3
+     │ Any      Any      Any
+─────┼───────────────────────────
+   1 │ 1        a        1.0
+   2 │ 2        a        1.0
+   3 │ 4        a        1.0
+   4 │ 1        b        1.0
+   5 │ 2        b        1.0
+   6 │ 4        b        1.0
+   7 │ 1        a        -1.0
+   8 │ 2        a        -1.0
+   9 │ 4        a        -1.0
+  10 │ 1        b        -1.0
+  11 │ 2        b        -1.0
+  12 │ 4        b        -1.0
 
 ```
 """
@@ -264,17 +264,17 @@ Factors: (factor1 = [-1, 1], factor2 = [-1, 1], factor3 = [-1, 1])
 Formula: 0 ~ factor1 + factor2 + factor3
 Design Matrix:
 8×3 DataFrame
-│ Row │ factor1 │ factor2 │ factor3 │
-│     │ Int64   │ Int64   │ Int64   │
-├─────┼─────────┼─────────┼─────────┤
-│ 1   │ -1      │ -1      │ -1      │
-│ 2   │ 1       │ -1      │ -1      │
-│ 3   │ -1      │ 1       │ -1      │
-│ 4   │ 1       │ 1       │ -1      │
-│ 5   │ -1      │ -1      │ 1       │
-│ 6   │ 1       │ -1      │ 1       │
-│ 7   │ -1      │ 1       │ 1       │
-│ 8   │ 1       │ 1       │ 1       │
+ Row │ factor1  factor2  factor3
+     │ Int64    Int64    Int64
+─────┼───────────────────────────
+   1 │      -1       -1       -1
+   2 │       1       -1       -1
+   3 │      -1        1       -1
+   4 │       1        1       -1
+   5 │      -1       -1        1
+   6 │       1       -1        1
+   7 │      -1        1        1
+   8 │       1        1        1
 
 ```
 """
@@ -381,12 +381,12 @@ julia> DesignDistribution(DiscreteNonParametric([-1, 1], [0.5, 0.5]), 6)
 DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3 + factor4 + factor5 + factor6
 Factor Distributions:
-factor1: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor2: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor3: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor4: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor5: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
-factor6: Distributions.DiscreteNonParametric{Int64,Float64,Array{Int64,1},Array{Float64,1}}(support=[-1, 1], p=[0.5, 0.5])
+factor1: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor2: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor3: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor4: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor5: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor6: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
 
 ```
 """
@@ -406,21 +406,21 @@ Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.
 Formula: 0 ~ f1 + f2 + f3
 Design Matrix:
 12×3 DataFrame
-│ Row │ f1      │ f2      │ f3      │
-│     │ Float64 │ Float64 │ Float64 │
-├─────┼─────────┼─────────┼─────────┤
-│ 1   │ 2.04922 │ 5.0     │ 5.72029 │
-│ 2   │ 2.59117 │ 1.0     │ 8.48192 │
-│ 3   │ 2.77148 │ 4.0     │ 5.42517 │
-│ 4   │ 2.25659 │ 5.0     │ 6.75815 │
-│ 5   │ 2.64968 │ 5.0     │ 8.94993 │
-│ 6   │ 2.31523 │ 4.0     │ 5.89413 │
-│ 7   │ 2.86526 │ 3.0     │ 9.8807  │
-│ 8   │ 2.44753 │ -1.0    │ 9.24986 │
-│ 9   │ 2.08284 │ 3.0     │ 9.99911 │
-│ 10  │ 2.81201 │ 2.0     │ 7.28848 │
-│ 11  │ 2.64232 │ 4.0     │ 5.34507 │
-│ 12  │ 2.08189 │ 4.0     │ 8.303   │
+ Row │ f1       f2       f3
+     │ Float64  Float64  Float64
+─────┼───────────────────────────
+   1 │ 2.04922     -1.0  9.62061
+   2 │ 2.59117      3.0  5.79254
+   3 │ 2.77148     -1.0  6.22902
+   4 │ 2.25659      4.0  6.00256
+   5 │ 2.64968      2.0  9.21818
+   6 │ 2.31523      5.0  8.80749
+   7 │ 2.86526      2.0  8.47297
+   8 │ 2.44753      0.0  6.11722
+   9 │ 2.08284     -1.0  6.34626
+  10 │ 2.81201     -1.0  6.44508
+  11 │ 2.64232      3.0  5.57183
+  12 │ 2.08189      1.0  8.72759
 
 ```
 """
@@ -471,23 +471,23 @@ OptimalDesign
 Dimension: (10, 3)
 Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0))
 Formula: 0 ~ f1 + f2 + f3 + :(f2 ^ 2)
-Selected Candidate Rows: [222, 103, 384, 140, 139, 156, 63, 184, 169, 54]
-Optimality Criteria: Dict(:D => 2.418045723405036)
+Selected Candidate Rows: [244, 49, 375, 43, 369, 44, 16, 346, 175, 205]
+Optimality Criteria: Dict(:D => 2.3940431912232483)
 Design Matrix:
 10×3 DataFrame
-│ Row │ f1      │ f2      │ f3      │
-│     │ Float64 │ Float64 │ Float64 │
-├─────┼─────────┼─────────┼─────────┤
-│ 1   │ 2.02407 │ -1.0    │ 5.07959 │
-│ 2   │ 2.0203  │ 5.0     │ 9.50193 │
-│ 3   │ 2.80676 │ -1.0    │ 9.87726 │
-│ 4   │ 2.9996  │ 2.0     │ 5.03174 │
-│ 5   │ 2.14846 │ 2.0     │ 9.72596 │
-│ 6   │ 2.84392 │ 5.0     │ 5.01213 │
-│ 7   │ 2.04046 │ 2.0     │ 5.00331 │
-│ 8   │ 2.93432 │ 1.0     │ 9.71405 │
-│ 9   │ 2.79858 │ -1.0    │ 5.35685 │
-│ 10  │ 2.97635 │ 5.0     │ 8.10695 │
+ Row │ f1       f2       f3
+     │ Float64  Float64  Float64
+─────┼───────────────────────────
+   1 │ 2.99329      1.0  5.09246
+   2 │ 2.96899      5.0  9.39802
+   3 │ 2.96274     -1.0  5.31426
+   4 │ 2.00285      2.0  5.40398
+   5 │ 2.8491       1.0  9.90621
+   6 │ 2.00309     -1.0  9.49394
+   7 │ 2.20051      2.0  9.75605
+   8 │ 2.06422      5.0  5.1759
+   9 │ 2.037       -1.0  9.13114
+  10 │ 2.82612      5.0  9.66349
 
 ```
 """

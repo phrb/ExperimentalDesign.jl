@@ -8,7 +8,7 @@ factorial design, use [`explicit_fullfactorial`](@ref).
 
 ```jldoctest
 julia> fullfactorial(Tuple([-1, 1] for i = 1:10))
-Base.Iterators.ProductIterator{NTuple{10,Array{Int64,1}}}(([-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1]))
+Base.Iterators.ProductIterator{NTuple{10, Vector{Int64}}}(([-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-1, 1]))
 
 ```
 """
@@ -24,7 +24,7 @@ factorial design. The generated array is exponentially large.
 
 ```jldoctest
 julia> explicit_fullfactorial(fullfactorial(([-1, 1], [:a, :b, :c])))
-6×2 Array{Any,2}:
+6×2 Matrix{Any}:
  -1  :a
   1  :a
  -1  :b
@@ -46,7 +46,7 @@ an explicit full factorial design. The generated array is exponentially large.
 
 ```jldoctest
 julia> explicit_fullfactorial(([-1, 1], [:a, :b, :c], [1, 2]))
-12×3 Array{Any,2}:
+12×3 Matrix{Any}:
  -1  :a  1
   1  :a  1
  -1  :b  1

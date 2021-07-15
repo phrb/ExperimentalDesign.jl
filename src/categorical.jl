@@ -32,13 +32,13 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> rand(CategoricalFactor([:a, :b, 2, 1.0]), 6)
-6-element Array{Any,1}:
-  :b
+6-element Vector{Any}:
  2
  1.0
+  :b
  2
-  :a
  2
+ 1.0
 
 ```
 """
