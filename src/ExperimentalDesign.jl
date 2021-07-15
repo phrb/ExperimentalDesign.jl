@@ -21,7 +21,7 @@ export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
 
 # Methods
 
-export fullfactorial,  explicit_fullfactorial, plackettburman, isplackettburman,
+export fullfactorial,  explicit_fullfactorial, plackettburman, fold!, isplackettburman,
     paley, rand, random_design!, next_offset_divisible_prime, kl_exchange, d_criterion
 
 # Pretty printing
@@ -35,5 +35,6 @@ include("random.jl")
 include("kl_exchange.jl")
 include("custom_show.jl")
 include("categorical.jl")
+include("fold.jl")
 
 end
