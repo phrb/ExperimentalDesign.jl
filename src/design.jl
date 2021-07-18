@@ -463,7 +463,7 @@ Design Matrix:
 """
 function RandomLHCDesign(n::Int, d::Int)
     factors = Tuple(Symbol("factor" * string(i)) for i = 1:d)
-    design = DataFrame(randomLHC(n,d))
+    design = DataFrame(randomLHC(n,d), :auto)
     rename!(design, collect(factors))
     RandomLHCDesign(design, factors)
 end
@@ -488,7 +488,7 @@ Design Matrix:
 ```
 """
 function RandomLHCDesign(n::Int, factors::Tuple)
-    design = DataFrame(randomLHC(n,length(factors)))
+    design = DataFrame(randomLHC(n,length(factors)), :auto)
     rename!(design, collect(factors))
     RandomLHCDesign(design, factors)
 end
@@ -502,7 +502,7 @@ $(TYPEDFIELDS)
 struct OptimLHCDesign <: AbstractRandomDesign
     matrix::DataFrame
     factors::Tuple
-    fitness::Any
+    fitness::Vector{Float64}
 end
 
 """
@@ -530,7 +530,7 @@ Design Matrix:
 function OptimLHCDesign(n::Int, d::Int, gens)
     factors = Tuple(Symbol("factor" * string(i)) for i = 1:d)
     design_matrix, fitness = LHCoptim(n, d, gens)
-    design = DataFrame(design_matrix)
+    design = DataFrame(design_matrix, :auto)
     rename!(design, collect(factors))
     OptimLHCDesign(design, factors, fitness)
 end
@@ -559,7 +559,7 @@ Design Matrix:
 """
 function OptimLHCDesign(n::Int, factors::Tuple, gens)
     design_matrix, fitness = LHCoptim(n, length(factors), gens)
-    design = DataFrame(design_matrix)
+    design = DataFrame(design_matrix, :auto)
     rename!(design, collect(factors))
     OptimLHCDesign(design, factors, fitness)
 end
