@@ -24,6 +24,22 @@ function Base.show(io::IO, design::FullFactorial)
     end
 end
 
+function Base.show(io::IO, design::FractionalFactorial2Level)
+    if typeof(design.matrix) == Missing
+        print(io, "$(typeof(design))\n",
+              "Factors: $(design.factors)\n",
+              "Formula: $(design.formula)\n",
+              "Design Matrix: On demand")
+    else
+        print(io, "$(typeof(design))\n",
+              "Dimension: $(size(design.matrix))\n",
+              "Factors: $(design.factors)\n",
+              "Formula: $(design.formula)\n",
+              "Design Matrix:\n")
+        show(io, design.matrix)
+    end
+end
+
 function Base.show(io::IO, design::DesignDistribution)
     print(io, "$(typeof(design))\n",
           "Formula: $(design.formula)\n",

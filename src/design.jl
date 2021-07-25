@@ -288,7 +288,68 @@ $(TYPEDEF)
 
 $(TYPEDFIELDS)
 """
-struct FractionalFactorial <: AbstractFactorialDesign
+struct FractionalFactorial2Level <: AbstractFactorialDesign
+    matrix::DataFrame
+    factors::NamedTuple
+    formula::FormulaTerm
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> FractionalFactorial2Level(@formula(y ~ a + b + a&b + c + a&c+ b&c + a&b&c))
+FractionalFactorial2Level
+Dimension: (8, 7)
+Factors: (a = [-1, 1], b = [-1, 1], c = [-1, 1])
+Formula: y ~ a + b + c + a & b + a & c + b & c + a & b & c
+Design Matrix:
+8×7 DataFrame
+ Row │ a      b      c      a_b    a_c    b_c    a_b_c 
+     │ Int64  Int64  Int64  Int64  Int64  Int64  Int64 
+─────┼─────────────────────────────────────────────────
+   1 │    -1     -1     -1      1      1      1     -1
+   2 │     1     -1     -1     -1     -1      1      1
+   3 │    -1      1     -1     -1      1     -1      1
+   4 │     1      1     -1      1     -1     -1     -1
+   5 │    -1     -1      1      1     -1     -1      1
+   6 │     1     -1      1     -1      1     -1     -1
+   7 │    -1      1      1     -1     -1      1     -1
+   8 │     1      1      1      1      1      1      1
+
+```
+"""
+function FractionalFactorial2Level(formula::FormulaTerm)
+    symbol_main_factors_array = []
+    symbol_interaction_factors_array = []
+    # TODO can only handle simple interaction terms but not functional terms
+    for r in formula.rhs
+        if r isa InteractionTerm
+            append!(symbol_interaction_factors_array, [r])
+            for s in r.terms
+                append!(symbol_main_factors_array, [s.sym])
+            end
+        elseif r isa Term
+            append!(symbol_main_factors_array, [r.sym])
+        end
+    end
+    symbol_factors = Tuple(unique!(symbol_main_factors_array))
+    levels = [[-1,1] for i in symbol_factors]
+    A_ff = FullFactorial(NamedTuple{symbol_factors}(levels))
+    for (index, interactionterm) in enumerate(symbol_interaction_factors_array)
+        interaction_factors = [term.sym for term in interactionterm.terms]
+        switch = false
+        fac = A_ff.matrix[:, interaction_factors[1]]
+        for factor in interaction_factors
+            if switch == false
+                switch = true
+            else
+                fac =  fac .* A_ff.matrix[!, factor]
+            end
+        end
+        A_ff.matrix[!, Symbol(join(interaction_factors, "_"))] = fac
+    end
+    FractionalFactorial2Level(A_ff.matrix, NamedTuple{symbol_factors}(levels), formula)
 end
 
 """
