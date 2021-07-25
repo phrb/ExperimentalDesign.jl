@@ -59,6 +59,23 @@ function Base.show(io::IO, design::RandomDesign)
     show(io, design.matrix)
 end
 
+function Base.show(io::IO, design::RandomLHCDesign)
+    print(io, "$(typeof(design))\n",
+          "Dimension: $(size(design.matrix))\n",
+          "Factors: $(design.factors)\n",
+          "Design Matrix:\n")
+    show(io, design.matrix)
+end
+
+function Base.show(io::IO, design::OptimLHCDesign)
+    print(io, "$(typeof(design))\n",
+          "Dimension: $(size(design.matrix))\n",
+          "Factors: $(design.factors)\n",
+          "Fitness: $(design.fitness)\n",
+          "Design Matrix:\n")
+    show(io, design.matrix)
+end
+
 function Base.show(io::IO, design::OptimalDesign)
     print(io, "$(typeof(design))\n",
           "Dimension: $(size(design.matrix))\n",
