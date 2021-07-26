@@ -19,7 +19,7 @@ import Random: rand
 export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
     AbstractOptimalDesign,  PlackettBurman, FullFactorial, FractionalFactorial,
     FractionalFactorial2Level, OptimalDesign, DesignDistribution, CategoricalFactor,
-    OptimLHCDesign
+    OptimLHCDesign, RandomLHCDesign
 
 # Methods
 
