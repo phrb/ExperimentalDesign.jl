@@ -512,13 +512,13 @@ Dimension: (4, 3)
 Factors: (:factor1, :factor2, :factor3)
 Design Matrix:
 4×3 DataFrame
-│ Row │ factor1 │ factor2 │ factor3 │
-│     │ Int64   │ Int64   │ Int64   │
-├─────┼─────────┼─────────┼─────────┤
-│ 1   │ 4       │ 2       │ 1       │
-│ 2   │ 3       │ 3       │ 4       │
-│ 3   │ 1       │ 4       │ 3       │
-│ 4   │ 2       │ 1       │ 2       │
+ Row │ factor1  factor2  factor3
+     │ Int64    Int64    Int64
+─────┼───────────────────────────
+   1 │       1        4        4
+   2 │       2        1        2
+   3 │       3        3        3
+   4 │       4        2        1
 
 ```
 """
@@ -539,13 +539,13 @@ Dimension: (4, 3)
 Factors: (:A, :B, :C)
 Design Matrix:
 4×3 DataFrame
-│ Row │ A     │ B     │ C     │
-│     │ Int64 │ Int64 │ Int64 │
-├─────┼───────┼───────┼───────┤
-│ 1   │ 1     │ 4     │ 1     │
-│ 2   │ 3     │ 1     │ 4     │
-│ 3   │ 2     │ 2     │ 2     │
-│ 4   │ 4     │ 3     │ 3     │
+ Row │ A      B      C
+     │ Int64  Int64  Int64
+─────┼─────────────────────
+   1 │     1      4      4
+   2 │     2      1      2
+   3 │     3      3      3
+   4 │     4      2      1
 ```
 """
 function RandomLHCDesign(n::Int, factors::Tuple)
@@ -571,21 +571,20 @@ $(TYPEDSIGNATURES)
 
 ```jldoctest
 julia> OptimLHCDesign(5,3,4)
-OptimLHCDesign(5,3,4)
 OptimLHCDesign
 Dimension: (5, 3)
 Factors: (:factor1, :factor2, :factor3)
-Fitness: [1.3161657915316725, 1.3215298627608687, 1.3760238272524201, 1.3760238272524201, 1.3760238272524201]
+Fitness: [1.3760238272524201, 1.3760238272524201, 1.3760238272524201, 1.3760238272524201, 1.3760238272524201]
 Design Matrix:
 5×3 DataFrame
-│ Row │ factor1 │ factor2 │ factor3 │
-│     │ Int64   │ Int64   │ Int64   │
-├─────┼─────────┼─────────┼─────────┤
-│ 1   │ 5       │ 1       │ 3       │
-│ 2   │ 3       │ 5       │ 2       │
-│ 3   │ 1       │ 3       │ 4       │
-│ 4   │ 2       │ 2       │ 1       │
-│ 5   │ 4       │ 4       │ 5       │
+ Row │ factor1  factor2  factor3
+     │ Int64    Int64    Int64
+─────┼───────────────────────────
+   1 │       3        5        2
+   2 │       5        1        3
+   3 │       4        4        5
+   4 │       2        2        1
+   5 │       1        3        4
 ```
 """
 function OptimLHCDesign(n::Int, d::Int, gens)
@@ -604,17 +603,17 @@ julia> OptimLHCDesign(5,Tuple((:A,:B,:C)),4)
 OptimLHCDesign
 Dimension: (5, 3)
 Factors: (:A, :B, :C)
-Fitness: [1.3584331750511178, 1.3584331750511178, 1.3584331750511178, 1.3584331750511178, 1.3627530364372469]
+Fitness: [1.3760238272524201, 1.3760238272524201, 1.3760238272524201, 1.3760238272524201, 1.3760238272524201]
 Design Matrix:
 5×3 DataFrame
-│ Row │ A     │ B     │ C     │
-│     │ Int64 │ Int64 │ Int64 │
-├─────┼───────┼───────┼───────┤
-│ 1   │ 3     │ 1     │ 4     │
-│ 2   │ 2     │ 4     │ 5     │
-│ 3   │ 1     │ 3     │ 1     │
-│ 4   │ 4     │ 5     │ 3     │
-│ 5   │ 5     │ 2     │ 2     │
+ Row │ A      B      C
+     │ Int64  Int64  Int64
+─────┼─────────────────────
+   1 │     3      5      2
+   2 │     5      1      3
+   3 │     4      4      5
+   4 │     2      2      1
+   5 │     1      3      4
 
 ```
 """
