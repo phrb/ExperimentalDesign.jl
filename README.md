@@ -22,8 +22,11 @@ Current features are:
 - Full factorial designs:
   - Explicit: for small designs that fit in memory
   - Iterable: for larger designs, generates experiments on demand
+- Two-level fractional factorial designs
 - Plackett-Burman designs for screening (check the [example](https://github.com/phrb/ExperimentalDesign.jl/blob/master/examples/Screening%20with%20Plackett-Burman%20Designs.ipynb))
+- Box-Behnken and and central composite designs for response surface modeling
 - Flexible random designs using the [Distributions](https://github.com/JuliaStats/Distributions.jl) package
+- Latin Hypercube designs using the [LatinHypercubeSampling.jl](LatinHypercubeSampling.jl) package
 - Several variance-optimizing criteria
 
 Intended features include the ones provided by R packages such as
