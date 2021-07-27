@@ -11,6 +11,11 @@ abstract type AbstractScreeningDesign <: AbstractDesign end
 """
 $(TYPEDEF)
 """
+abstract type AbstractResponseSurfaceDesign <: AbstractDesign end
+
+"""
+$(TYPEDEF)
+"""
 abstract type AbstractFactorialDesign <: AbstractDesign end
 
 """
@@ -122,6 +127,114 @@ Design Matrix:
 """
 function PlackettBurman(factors::Int)
     PlackettBurman(ConstantTerm(0) ~ sum(term.(Symbol("factor" * string(i)) for i = 1:factors)))
+end
+
+"""
+$(TYPEDEF)
+
+Box-Behnken design for response surface methodology.
+
+$(TYPEDFIELDS)
+"""
+struct BoxBehnken <: AbstractResponseSurfaceDesign
+    matrix::DataFrame
+    factors::Tuple
+    formula::FormulaTerm
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> BoxBehnken(@formula( y ~ -1 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3 + factor1 + factor2 + factor3), center=3)
+BoxBehnken
+Dimension: (15, 3)
+Factors: (:factor1, :factor2, :factor3)
+Formula: y ~ -1 + factor1 + factor2 + factor3 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3
+Design Matrix:
+15×3 DataFrame
+ Row │ factor1  factor2  factor3 
+     │ Float64  Float64  Float64 
+─────┼───────────────────────────
+   1 │    -1.0     -1.0      0.0
+   2 │     1.0     -1.0      0.0
+   3 │    -1.0      1.0      0.0
+   4 │     1.0      1.0      0.0
+   5 │    -1.0      0.0     -1.0
+   6 │     1.0      0.0     -1.0
+   7 │    -1.0      0.0      1.0
+   8 │     1.0      0.0      1.0
+   9 │     0.0     -1.0     -1.0
+  10 │     0.0      1.0     -1.0
+  11 │     0.0     -1.0      1.0
+  12 │     0.0      1.0      1.0
+  13 │     0.0      0.0      0.0
+  14 │     0.0      0.0      0.0
+  15 │     0.0      0.0      0.0
+
+```
+"""
+function BoxBehnken(formula::FormulaTerm; center::Int=1)
+    symbol_factors_array = []
+    # TODO can only handle interaction terms not functional terms
+    for r in formula.rhs
+        if r isa InteractionTerm
+            for s in r.terms
+                append!(symbol_factors_array, [s.sym])
+            end
+        elseif r isa Term
+            append!(symbol_factors_array, [r.sym])
+        end
+    end
+    symbol_factors = Tuple(unique!(symbol_factors_array))
+
+    initial_design = boxbehnken(length(symbol_factors_array), center)
+    design = DataFrame(initial_design, :auto)
+
+    rename!(design, collect(symbol_factors))
+
+    BoxBehnken(design, symbol_factors, formula)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> BoxBehnken(3, center=3)
+BoxBehnken
+Dimension: (15, 3)
+Factors: (:factor1, :factor2, :factor3)
+Formula: y ~ -1 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3 + factor1 + factor2 + factor3
+Design Matrix:
+15×3 DataFrame
+ Row │ factor1  factor2  factor3 
+     │ Float64  Float64  Float64 
+─────┼───────────────────────────
+   1 │    -1.0     -1.0      0.0
+   2 │     1.0     -1.0      0.0
+   3 │    -1.0      1.0      0.0
+   4 │     1.0      1.0      0.0
+   5 │    -1.0      0.0     -1.0
+   6 │     1.0      0.0     -1.0
+   7 │    -1.0      0.0      1.0
+   8 │     1.0      0.0      1.0
+   9 │     0.0     -1.0     -1.0
+  10 │     0.0      1.0     -1.0
+  11 │     0.0     -1.0      1.0
+  12 │     0.0      1.0      1.0
+  13 │     0.0      0.0      0.0
+  14 │     0.0      0.0      0.0
+  15 │     0.0      0.0      0.0
+
+```
+"""
+function BoxBehnken(factors::Int; center::Int=1)
+    factors_tuple = Tuple(Symbol("factor" * string(i)) for i = 1:factors)
+    q_terms = sum(InteractionTerm(term.((only(x),only(x)))) for x ∈ combinations(factors_tuple, 1))
+    i_terms = sum((&)(term.(x)...) for x ∈ combinations(factors_tuple, 2))
+    l_terms = sum(term(only(x)) for x ∈ combinations(factors_tuple, 1))
+    formula = term(:y) ~ term(-1) + q_terms + i_terms + l_terms
+    BoxBehnken(formula, center=center)
 end
 
 """
