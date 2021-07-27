@@ -240,6 +240,123 @@ end
 """
 $(TYPEDEF)
 
+Encapsulates a central composite design.
+
+$(TYPEDFIELDS)
+"""
+struct CentralComposite <: AbstractResponseSurfaceDesign
+    matrix::DataFrame
+    factors::Tuple
+    formula::FormulaTerm
+    alpha::Symbol
+    face::Symbol
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> CentralComposite(@formula(y ~ -1 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3 + factor1 + factor2 + factor3))
+CentralComposite
+Dimension: (22, 3)
+Factors: (:factor1, :factor2, :factor3)
+Formula: y ~ -1 + factor1 + factor2 + factor3 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3
+Alpha: orthogonal
+Face: circumscribed
+Design Matrix:
+22×3 DataFrame
+ Row │ factor1   factor2   factor3
+     │ Float64   Float64   Float64
+─────┼──────────────────────────────
+   1 │ -1.0      -1.0      -1.0
+   2 │  1.0      -1.0      -1.0
+   3 │ -1.0       1.0      -1.0
+   4 │  1.0       1.0      -1.0
+   5 │ -1.0      -1.0       1.0
+   6 │  1.0      -1.0       1.0
+   7 │ -1.0       1.0       1.0
+   8 │  1.0       1.0       1.0
+  ⋮  │    ⋮         ⋮         ⋮
+  16 │  0.0       1.82574   0.0
+  17 │  0.0       0.0      -1.82574
+  18 │  0.0       0.0       1.82574
+  19 │  0.0       0.0       0.0
+  20 │  0.0       0.0       0.0
+  21 │  0.0       0.0       0.0
+  22 │  0.0       0.0       0.0
+                      7 rows omitted
+
+```
+"""
+function CentralComposite(formula::FormulaTerm; center::Array{Int}=[4, 4], alpha::Symbol=:orthogonal, face::Symbol=:circumscribed)
+    symbol_factors_array = []
+    # TODO can only handle interaction terms not functional terms
+    for r in formula.rhs
+        if r isa InteractionTerm
+            for s in r.terms
+                append!(symbol_factors_array, [s.sym])
+            end
+        elseif r isa Term
+            append!(symbol_factors_array, [r.sym])
+        end
+    end
+    symbol_factors = Tuple(unique!(symbol_factors_array))
+
+    initial_design = ccdesign(length(symbol_factors_array), center, alpha, face)
+    design = DataFrame(initial_design, :auto)
+    rename!(design, collect(symbol_factors))
+
+    CentralComposite(design, symbol_factors, formula, alpha, face)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+```jldoctest
+julia> CentralComposite(3)
+CentralComposite
+Dimension: (22, 3)
+Factors: (:factor1, :factor2, :factor3)
+Formula: y ~ -1 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3 + factor1 + factor2 + factor3
+Alpha: orthogonal
+Face: circumscribed
+Design Matrix:
+22×3 DataFrame
+ Row │ factor1   factor2   factor3
+     │ Float64   Float64   Float64
+─────┼──────────────────────────────
+   1 │ -1.0      -1.0      -1.0
+   2 │  1.0      -1.0      -1.0
+   3 │ -1.0       1.0      -1.0
+   4 │  1.0       1.0      -1.0
+   5 │ -1.0      -1.0       1.0
+   6 │  1.0      -1.0       1.0
+   7 │ -1.0       1.0       1.0
+   8 │  1.0       1.0       1.0
+  ⋮  │    ⋮         ⋮         ⋮
+  16 │  0.0       1.82574   0.0
+  17 │  0.0       0.0      -1.82574
+  18 │  0.0       0.0       1.82574
+  19 │  0.0       0.0       0.0
+  20 │  0.0       0.0       0.0
+  21 │  0.0       0.0       0.0
+  22 │  0.0       0.0       0.0
+                      7 rows omitted
+
+```
+"""
+function CentralComposite(factors::Int; center::Array{Int}=[4, 4], alpha::Symbol=:orthogonal, face::Symbol=:circumscribed)
+    factors_tuple = Tuple(Symbol("factor" * string(i)) for i = 1:factors)
+    q_terms = sum(InteractionTerm(term.((only(x),only(x)))) for x ∈ combinations(factors_tuple, 1))
+    i_terms = sum((&)(term.(x)...) for x ∈ combinations(factors_tuple, 2))
+    l_terms = sum(term(only(x)) for x ∈ combinations(factors_tuple, 1))
+    formula = term(:y) ~ term(-1) + q_terms + i_terms + l_terms
+    CentralComposite(formula, center=center,  alpha=alpha, face=face)
+end
+
+"""
+$(TYPEDEF)
+
 Encapsulates  an *explicit*  full factorial  design, where  all experiments  are
 completely computed  and stored.  Use [`IterableFullFactorial`](@ref)  to obtain
 an *implicit* factorial  design with arbitrary access to the  elements of a full

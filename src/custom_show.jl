@@ -17,6 +17,17 @@ function Base.show(io::IO, design::BoxBehnken)
     show(io, design.matrix)
 end
 
+function Base.show(io::IO, design::CentralComposite)
+    print(io, "$(typeof(design))\n",
+          "Dimension: $(size(design.matrix))\n",
+          "Factors: $(design.factors)\n",
+          "Formula: $(design.formula)\n",
+          "Alpha: $(design.alpha)\n",
+          "Face: $(design.face)\n",
+          "Design Matrix:\n")
+    show(io, design.matrix)
+end
+
 function Base.show(io::IO, design::FullFactorial)
     if typeof(design.matrix) == Missing
         print(io, "$(typeof(design))\n",

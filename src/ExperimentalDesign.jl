@@ -18,7 +18,7 @@ import Random: rand
 # Types
 
 export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
-    AbstractOptimalDesign,  BoxBehnken, PlackettBurman, FullFactorial, FractionalFactorial,
+    AbstractOptimalDesign,  BoxBehnken, CentralComposite, PlackettBurman, FullFactorial, FractionalFactorial,
     FractionalFactorial2Level, OptimalDesign, DesignDistribution, CategoricalFactor,
     OptimLHCDesign, RandomLHCDesign
 
@@ -26,7 +26,7 @@ export    AbstractDesign,   AbstractScreeningDesign,    AbstractFactorialDesign,
 
 export fullfactorial,  explicit_fullfactorial, plackettburman, fold!, isplackettburman,
     paley, rand, random_design!, next_offset_divisible_prime, kl_exchange, d_criterion,
-    boxbehnken
+    boxbehnken, ccdesign
 
 # Pretty printing
 
@@ -39,6 +39,7 @@ include("random.jl")
 include("kl_exchange.jl")
 include("custom_show.jl")
 include("categorical.jl")
+include("central_composite.jl")
 include("fold.jl")
 include("box-behnken.jl")
 
