@@ -1,4 +1,4 @@
-using Documenter, ExperimentalDesign
+using Documenter, ExperimentalDesign, StatsModels, GLM, DataFrames, Distributions, Random, StatsPlots
 
 random_seed = 443591
 
@@ -13,8 +13,7 @@ end
 
 DocMeta.setdocmeta!(ExperimentalDesign,
                     :DocTestSetup,
-                    :(using ExperimentalDesign, Distributions,
-                      Random, StatsModels, DataFrames;
+                    :(using ExperimentalDesign, StatsModels, GLM, DataFrames, Distributions, Random, StatsPlots;
                       Random.seed!($random_seed););
                     recursive = true)
 
@@ -28,10 +27,11 @@ makedocs(
     sitename = "ExperimentalDesign.jl",
     authors = "Pedro Bruel and contributors.",
     linkcheck = !("skiplinks" in ARGS),
-    strict = !("strict=false" in ARGS),
+    #strict = !("strict=false" in ARGS),
     doctest = ("doctest=only" in ARGS) ? :only : true,
     pages = [
         "Home" => "index.md",
+        "Examples" => "lib/examples.md",
         "Library" => Any[
             "Public" => "lib/public.md",
             "Internals" => "lib/internals.md"

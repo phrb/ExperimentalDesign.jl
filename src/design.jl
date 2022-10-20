@@ -153,8 +153,8 @@ Factors: (:factor1, :factor2, :factor3)
 Formula: y ~ -1 + factor1 + factor2 + factor3 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3
 Design Matrix:
 15×3 DataFrame
- Row │ factor1  factor2  factor3 
-     │ Float64  Float64  Float64 
+ Row │ factor1  factor2  factor3
+     │ Float64  Float64  Float64
 ─────┼───────────────────────────
    1 │    -1.0     -1.0      0.0
    2 │     1.0     -1.0      0.0
@@ -207,8 +207,8 @@ Factors: (:factor1, :factor2, :factor3)
 Formula: y ~ -1 + factor1 & factor1 + factor2 & factor2 + factor3 & factor3 + factor1 & factor2 + factor1 & factor3 + factor2 & factor3 + factor1 + factor2 + factor3
 Design Matrix:
 15×3 DataFrame
- Row │ factor1  factor2  factor3 
-     │ Float64  Float64  Float64 
+ Row │ factor1  factor2  factor3
+     │ Float64  Float64  Float64
 ─────┼───────────────────────────
    1 │    -1.0     -1.0      0.0
    2 │     1.0     -1.0      0.0
@@ -535,8 +535,8 @@ Factors: (a = [-1, 1], b = [-1, 1], c = [-1, 1])
 Formula: y ~ a + b + c + a & b + a & c + b & c + a & b & c
 Design Matrix:
 8×7 DataFrame
- Row │ a      b      c      a_b    a_c    b_c    a_b_c 
-     │ Int64  Int64  Int64  Int64  Int64  Int64  Int64 
+ Row │ a      b      c      a_b    a_c    b_c    a_b_c
+     │ Int64  Int64  Int64  Int64  Int64  Int64  Int64
 ─────┼─────────────────────────────────────────────────
    1 │    -1     -1     -1      1      1      1     -1
    2 │     1     -1     -1     -1     -1      1      1
@@ -618,9 +618,9 @@ julia> DesignDistribution((f1 = Uniform(2, 3), f2 = DiscreteUniform(-1, 5), f3 =
 DesignDistribution
 Formula: 0 ~ f1 + f2 + f3
 Factor Distributions:
-f1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
-f2: Distributions.DiscreteUniform(a=-1, b=5)
-f3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
+f1: Uniform{Float64}(a=2.0, b=3.0)
+f2: DiscreteUniform(a=-1, b=5)
+f3: Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
@@ -636,9 +636,9 @@ julia> DesignDistribution((Uniform(2, 3), DiscreteUniform(-1, 5), Uniform(5, 10)
 DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3
 Factor Distributions:
-factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
-factor2: Distributions.DiscreteUniform(a=-1, b=5)
-factor3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
+factor1: Uniform{Float64}(a=2.0, b=3.0)
+factor2: DiscreteUniform(a=-1, b=5)
+factor3: Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
@@ -654,9 +654,9 @@ julia> DesignDistribution([Uniform(2, 3), DiscreteUniform(-1, 5), Uniform(5, 10)
 DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3
 Factor Distributions:
-factor1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
-factor2: Distributions.DiscreteUniform(a=-1, b=5)
-factor3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
+factor1: Uniform{Float64}(a=2.0, b=3.0)
+factor2: DiscreteUniform(a=-1, b=5)
+factor3: Uniform{Float64}(a=5.0, b=10.0)
 
 ```
 """
@@ -672,12 +672,12 @@ julia> DesignDistribution(DiscreteNonParametric([-1, 1], [0.5, 0.5]), 6)
 DesignDistribution
 Formula: 0 ~ factor1 + factor2 + factor3 + factor4 + factor5 + factor6
 Factor Distributions:
-factor1: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
-factor2: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
-factor3: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
-factor4: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
-factor5: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
-factor6: Distributions.DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor1: DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor2: DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor3: DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor4: DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor5: DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
+factor6: DiscreteNonParametric{Int64, Float64, Vector{Int64}, Vector{Float64}}(support=[-1, 1], p=[0.5, 0.5])
 
 ```
 """
@@ -693,7 +693,7 @@ $(TYPEDSIGNATURES)
 julia> rand(DesignDistribution((f1 = Uniform(2, 3), f2 = DiscreteUniform(-1, 5), f3 = Uniform(5, 10))), 12)
 ExperimentalDesign.RandomDesign
 Dimension: (12, 3)
-Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0))
+Factors: (f1 = Uniform{Float64}(a=2.0, b=3.0), f2 = DiscreteUniform(a=-1, b=5), f3 = Uniform{Float64}(a=5.0, b=10.0))
 Formula: 0 ~ f1 + f2 + f3
 Design Matrix:
 12×3 DataFrame
@@ -881,9 +881,9 @@ julia> design_distribution = DesignDistribution((f1 = Uniform(2, 3), f2 = Discre
 DesignDistribution
 Formula: 0 ~ f1 + f2 + f3
 Factor Distributions:
-f1: Distributions.Uniform{Float64}(a=2.0, b=3.0)
-f2: Distributions.DiscreteUniform(a=-1, b=5)
-f3: Distributions.Uniform{Float64}(a=5.0, b=10.0)
+f1: Uniform{Float64}(a=2.0, b=3.0)
+f2: DiscreteUniform(a=-1, b=5)
+f3: Uniform{Float64}(a=5.0, b=10.0)
 
 julia> design = rand(design_distribution, 400);
 
@@ -892,7 +892,7 @@ julia> f = @formula 0 ~ f1 + f2 + f3 + f2 ^ 2;
 julia> OptimalDesign(design, f, 10)
 OptimalDesign
 Dimension: (10, 3)
-Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0))
+Factors: (f1 = Uniform{Float64}(a=2.0, b=3.0), f2 = DiscreteUniform(a=-1, b=5), f3 = Uniform{Float64}(a=5.0, b=10.0))
 Formula: 0 ~ f1 + f2 + f3 + :(f2 ^ 2)
 Selected Candidate Rows: [244, 49, 375, 43, 369, 44, 16, 346, 175, 205]
 Optimality Criteria: Dict(:D => 2.3940431912232483)

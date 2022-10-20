@@ -19,7 +19,7 @@
     Random.seed!(random_seed)
     n_candidates = 3000
     n_factors = 30;
-    design_generator = DesignDistribution(Distributions.Uniform(0, 1), n_factors)
+    design_generator = DesignDistribution(Uniform(0, 1), n_factors)
     candidates = rand(design_generator, n_candidates)
     selected_rows = kl_exchange(candidates.formula,
                                 candidates.matrix,
