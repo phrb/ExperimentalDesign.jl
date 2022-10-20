@@ -13,8 +13,7 @@ end
 
 DocMeta.setdocmeta!(ExperimentalDesign,
                     :DocTestSetup,
-                    :(using ExperimentalDesign, Distributions,
-                      Random, StatsModels, DataFrames;
+                    :(using ExperimentalDesign, StatsModels, GLM, DataFrames, Distributions, Random, StatsPlots;
                       Random.seed!($random_seed););
                     recursive = true)
 
