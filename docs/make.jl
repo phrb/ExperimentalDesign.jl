@@ -27,7 +27,7 @@ makedocs(
     sitename = "ExperimentalDesign.jl",
     authors = "Pedro Bruel and contributors.",
     linkcheck = !("skiplinks" in ARGS),
-    strict = !("strict=false" in ARGS),
+    #strict = !("strict=false" in ARGS),
     doctest = ("doctest=only" in ARGS) ? :only : true,
     pages = [
         "Home" => "index.md",
