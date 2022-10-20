@@ -17,7 +17,7 @@ rand(design_distribution, 3)
 
 design = rand(design_distribution, 400)
 
-@df design.matrix scatter(:size,
+p = @df design.matrix scatter(:size,
     :weight,
     size = (600, 600),
     xlabel = "size",
@@ -26,7 +26,13 @@ design = rand(design_distribution, 400)
     ylim = [0.0, 100.0],
     legend = false,
     title = "Uniformly Sampled Design")
+
+png(p, "plot1.png")
+nothing
 ```
+
+![](plot1.png)
+
 #### Generating Experiments for a Linear Hypothesis
 
 ```@example edexample
@@ -36,7 +42,7 @@ f = @formula 0 ~ size + weight
 
 optimal_design = OptimalDesign(design, f, 10)
 
-@df optimal_design.matrix scatter(:size,
+p = @df optimal_design.matrix scatter(:size,
     :weight,
     size = (600, 600),
     xlabel = "size",
@@ -45,8 +51,11 @@ optimal_design = OptimalDesign(design, f, 10)
     ylim = [0.0, 100.0],
     legend = false,
     title = "Design for y = size + weight")
-
+png(p, "plot2.png")
+nothing
 ```
+
+![](plot2.png)
 
 #### Generating Experiments for Other Terms
 
@@ -59,7 +68,7 @@ f = @formula 0 ~ size + weight + size ^ 2 + (1 / weight)
 
 optimal_design = OptimalDesign(design, f, 20)
 
-@df optimal_design.matrix scatter(:size,
+p = @df optimal_design.matrix scatter(:size,
     :weight,
     size = (600, 600),
     xlabel = "size",
@@ -68,8 +77,11 @@ optimal_design = OptimalDesign(design, f, 20)
     ylim = [0.0, 100.0],
     legend = false,
     title = "Design for y = size + weight + (size ^ 2) + (1 / weight)")
-
+png(p, "plot3.png")
+nothing
 ```
+
+![](plot3.png)
 
 ```@example edexample
 
@@ -77,7 +89,7 @@ design = rand(design_distribution, 800);
 f = @formula 0 ~ size + weight + size ^ 2
 optimal_design = OptimalDesign(design, f, 10)
 
-@df optimal_design.matrix scatter(:size,
+p = @df optimal_design.matrix scatter(:size,
     :weight,
     size = (600, 600),
     xlabel = "size",
@@ -85,8 +97,11 @@ optimal_design = OptimalDesign(design, f, 10)
     legend = false,
     title = "Design for y = size + weight + (size ^ 2)")
 
-
+png(p, "plot4.png")
+nothing
 ```
+
+![](plot4.png)
 
 #### Designs with Categorical Factors
 
@@ -104,14 +119,19 @@ optimal_design = OptimalDesign(design, f, 10)
 ```
 
 ```@example edexample
-@df optimal_design.matrix scatter(:f1,
+p = @df optimal_design.matrix scatter(:f1,
     :f2,
     size = (600, 600),
     xlabel = "f1",
     ylabel = "f2",
     legend = false,
     title = "Optimal Design for y = f1 + f2")
+png(p, "plot5.png")
+nothing
 ```
+
+![](plot5.png)
+
 
 ### Screening with Plackett-Burman Designs
 
