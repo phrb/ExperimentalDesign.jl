@@ -70,7 +70,7 @@ julia> n_candidates = 3000;
 
 julia> n_factors = 30;
 
-julia> design_generator = DesignDistribution(Distributions.Uniform(0, 1), n_factors);
+julia> design_generator = DesignDistribution(Uniform(0, 1), n_factors);
 
 julia> candidates = rand(design_generator, n_candidates);
 
@@ -214,7 +214,7 @@ function test()
     n = 50
 
     println("Allocating memory")
-    design_generator = DesignDistribution(Distributions.Uniform(0, 1), n)
+    design_generator = DesignDistribution(Uniform(0, 1), n)
     @time candidates = rand(design_generator, c)
 
     println("Design created, calling exchange")

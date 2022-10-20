@@ -892,7 +892,7 @@ julia> f = @formula 0 ~ f1 + f2 + f3 + f2 ^ 2;
 julia> OptimalDesign(design, f, 10)
 OptimalDesign
 Dimension: (10, 3)
-Factors: (f1 = Distributions.Uniform{Float64}(a=2.0, b=3.0), f2 = Distributions.DiscreteUniform(a=-1, b=5), f3 = Distributions.Uniform{Float64}(a=5.0, b=10.0))
+Factors: (f1 = Uniform{Float64}(a=2.0, b=3.0), f2 = DiscreteUniform(a=-1, b=5), f3 = Uniform{Float64}(a=5.0, b=10.0))
 Formula: 0 ~ f1 + f2 + f3 + :(f2 ^ 2)
 Selected Candidate Rows: [244, 49, 375, 43, 369, 44, 16, 346, 175, 205]
 Optimality Criteria: Dict(:D => 2.3940431912232483)
