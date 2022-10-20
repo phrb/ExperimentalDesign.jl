@@ -1,5 +1,9 @@
 ### Optimal Design with KL-Exchange
 
+```@setup edexample
+ENV["GKSwstype"] = "nul"
+```
+
 #### Generating Random Designs (Uniform)
 
 ```@example edexample
