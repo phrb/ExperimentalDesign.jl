@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · ExperimentalDesign.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ExperimentalDesign.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li class="is-active"><a class="tocitem" href>Examples</a></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../public/">Public</a></li><li><a class="tocitem" href="../internals/">Internals</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/phrb/ExperimentalDesign.jl/blob/master/docs/src/lib/examples.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h3 id="Optimal-Design-with-KL-Exchange"><a class="docs-heading-anchor" href="#Optimal-Design-with-KL-Exchange">Optimal Design with KL-Exchange</a><a id="Optimal-Design-with-KL-Exchange-1"></a><a class="docs-heading-anchor-permalink" href="#Optimal-Design-with-KL-Exchange" title="Permalink"></a></h3><h4 id="Generating-Random-Designs-(Uniform)"><a class="docs-heading-anchor" href="#Generating-Random-Designs-(Uniform)">Generating Random Designs (Uniform)</a><a id="Generating-Random-Designs-(Uniform)-1"></a><a class="docs-heading-anchor-permalink" href="#Generating-Random-Designs-(Uniform)" title="Permalink"></a></h4><pre><code class="language-julia hljs">using ExperimentalDesign, StatsModels, GLM, DataFrames, Distributions, Random, StatsPlots
+
+design_distribution = DesignDistribution((size = Uniform(23, 32), weight = Uniform(0, 100)))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">DesignDistribution
+Formula: 0 ~ size + weight
+Factor Distributions:
+size: Uniform{Float64}(a=23.0, b=32.0)
+weight: Uniform{Float64}(a=0.0, b=100.0)</code></pre><pre><code class="language-julia hljs">rand(design_distribution, 3)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">ExperimentalDesign.RandomDesign
+Dimension: (3, 2)
+Factors: (size = Uniform{Float64}(a=23.0, b=32.0), weight = Uniform{Float64}(a=0.0, b=100.0))
+Formula: 0 ~ size + weight
+Design Matrix:
+3×2 DataFrame
+ Row │ size     weight
+     │ Float64  Float64
+─────┼──────────────────
+   1 │ 23.443   25.6586
+   2 │ 28.3205  64.9684
+   3 │ 29.9433  31.5235</code></pre><pre><code class="language-julia hljs">design = rand(design_distribution, 400)
+
+p = @df design.matrix scatter(:size,
+    :weight,
+    size = (600, 600),
+    xlabel = &quot;size&quot;,
+    ylabel = &quot;weight&quot;,
+    xlim = [23.0, 32.0],
+    ylim = [0.0, 100.0],
+    legend = false,
+    title = &quot;Uniformly Sampled Design&quot;)
+
+png(p, &quot;plot1.png&quot;)
+nothing</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">qt.qpa.xcb: could not connect to display
+qt.qpa.plugin: Could not load the Qt platform plugin &quot;xcb&quot; in &quot;&quot; even though it was found.
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: linuxfb, minimal, offscreen, vnc, xcb.
+
+Aborted (core dumped)
+connect: Connection refused
+GKS: can&#39;t connect to GKS socket application
+
+GKS: Open failed in routine OPEN_WS
+GKS: GKS not in proper state. GKS must be either in the state WSOP or WSAC in routine ACTIVATE_WS</code></pre><p><img src="../plot1.png" alt/></p><h4 id="Generating-Experiments-for-a-Linear-Hypothesis"><a class="docs-heading-anchor" href="#Generating-Experiments-for-a-Linear-Hypothesis">Generating Experiments for a Linear Hypothesis</a><a id="Generating-Experiments-for-a-Linear-Hypothesis-1"></a><a class="docs-heading-anchor-permalink" href="#Generating-Experiments-for-a-Linear-Hypothesis" title="Permalink"></a></h4><pre><code class="language-julia hljs">design = rand(design_distribution, 400);
+
+f = @formula 0 ~ size + weight
+
+optimal_design = OptimalDesign(design, f, 10)
+
+p = @df optimal_design.matrix scatter(:size,
+    :weight,
+    size = (600, 600),
+    xlabel = &quot;size&quot;,
+    ylabel = &quot;weight&quot;,
+    xlim = [23.0, 32.0],
+    ylim = [0.0, 100.0],
+    legend = false,
+    title = &quot;Design for y = size + weight&quot;)
+png(p, &quot;plot2.png&quot;)
+nothing</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">qt.qpa.xcb: could not connect to display
+qt.qpa.plugin: Could not load the Qt platform plugin &quot;xcb&quot; in &quot;&quot; even though it was found.
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: linuxfb, minimal, offscreen, vnc, xcb.
+
+Aborted (core dumped)
+connect: Connection refused
+GKS: can&#39;t connect to GKS socket application
+
+GKS: Open failed in routine OPEN_WS
+GKS: GKS not in proper state. GKS must be either in the state WSOP or WSAC in routine ACTIVATE_WS</code></pre><p><img src="../plot2.png" alt/></p><h4 id="Generating-Experiments-for-Other-Terms"><a class="docs-heading-anchor" href="#Generating-Experiments-for-Other-Terms">Generating Experiments for Other Terms</a><a id="Generating-Experiments-for-Other-Terms-1"></a><a class="docs-heading-anchor-permalink" href="#Generating-Experiments-for-Other-Terms" title="Permalink"></a></h4><pre><code class="language-julia hljs">design = rand(design_distribution, 400);
+f = @formula 0 ~ size + weight + size ^ 2 + (1 / weight)
+
+optimal_design = OptimalDesign(design, f, 20)
+
+p = @df optimal_design.matrix scatter(:size,
+    :weight,
+    size = (600, 600),
+    xlabel = &quot;size&quot;,
+    ylabel = &quot;weight&quot;,
+    xlim = [23.0, 32.0],
+    ylim = [0.0, 100.0],
+    legend = false,
+    title = &quot;Design for y = size + weight + (size ^ 2) + (1 / weight)&quot;)
+png(p, &quot;plot3.png&quot;)
+nothing</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">qt.qpa.xcb: could not connect to display
+qt.qpa.plugin: Could not load the Qt platform plugin &quot;xcb&quot; in &quot;&quot; even though it was found.
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: linuxfb, minimal, offscreen, vnc, xcb.
+
+Aborted (core dumped)
+connect: Connection refused
+GKS: can&#39;t connect to GKS socket application
+
+GKS: Open failed in routine OPEN_WS
+GKS: GKS not in proper state. GKS must be either in the state WSOP or WSAC in routine ACTIVATE_WS</code></pre><p><img src="../plot3.png" alt/></p><pre><code class="language-julia hljs">design = rand(design_distribution, 800);
+f = @formula 0 ~ size + weight + size ^ 2
+optimal_design = OptimalDesign(design, f, 10)
+
+p = @df optimal_design.matrix scatter(:size,
+    :weight,
+    size = (600, 600),
+    xlabel = &quot;size&quot;,
+    ylabel = &quot;weight&quot;,
+    legend = false,
+    title = &quot;Design for y = size + weight + (size ^ 2)&quot;)
+
+png(p, &quot;plot4.png&quot;)
+nothing</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">qt.qpa.xcb: could not connect to display
+qt.qpa.plugin: Could not load the Qt platform plugin &quot;xcb&quot; in &quot;&quot; even though it was found.
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: linuxfb, minimal, offscreen, vnc, xcb.
+
+Aborted (core dumped)
+connect: Connection refused
+GKS: can&#39;t connect to GKS socket application
+
+GKS: Open failed in routine OPEN_WS
+GKS: GKS not in proper state. GKS must be either in the state WSOP or WSAC in routine ACTIVATE_WS</code></pre><p><img src="../plot4.png" alt/></p><h4 id="Designs-with-Categorical-Factors"><a class="docs-heading-anchor" href="#Designs-with-Categorical-Factors">Designs with Categorical Factors</a><a id="Designs-with-Categorical-Factors-1"></a><a class="docs-heading-anchor-permalink" href="#Designs-with-Categorical-Factors" title="Permalink"></a></h4><pre><code class="language-julia hljs">design_distribution = DesignDistribution((f1 = DiscreteUniform(0, 5),
+        f2 = CategoricalFactor([&quot;cf&quot;, &quot;cg&quot;, &quot;ca&quot;])))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">DesignDistribution
+Formula: 0 ~ f1 + f2
+Factor Distributions:
+f1: DiscreteUniform(a=0, b=5)
+f2: CategoricalFactor(
+values: [&quot;cf&quot;, &quot;cg&quot;, &quot;ca&quot;]
+distribution: DiscreteUniform(a=1, b=3)
+)
+</code></pre><pre><code class="language-julia hljs">design = rand(design_distribution, 300);
+f = @formula 0 ~ f1 + f1 ^ 2 + f2
+
+optimal_design = OptimalDesign(design, f, 10)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">OptimalDesign
+Dimension: (10, 2)
+Factors: (f1 = DiscreteUniform(a=0, b=5), f2 = CategoricalFactor(
+values: [&quot;cf&quot;, &quot;cg&quot;, &quot;ca&quot;]
+distribution: DiscreteUniform(a=1, b=3)
+)
+)
+Formula: 0 ~ f1 + :(f1 ^ 2) + f2
+Selected Candidate Rows: [85, 137, 189, 271, 252, 194, 9, 22, 10, 12]
+Optimality Criteria: Dict(:D =&gt; 0.029985918150315073)
+Design Matrix:
+10×2 DataFrame
+ Row │ f1   f2
+     │ Any  Any
+─────┼──────────
+   1 │ 2    cf
+   2 │ 2    cg
+   3 │ 3    cf
+   4 │ 4    ca
+   5 │ 0    cf
+   6 │ 1    cf
+   7 │ 4    cg
+   8 │ 3    cg
+   9 │ 1    ca
+  10 │ 5    ca</code></pre><pre><code class="language-julia hljs">p = @df optimal_design.matrix scatter(:f1,
+    :f2,
+    size = (600, 600),
+    xlabel = &quot;f1&quot;,
+    ylabel = &quot;f2&quot;,
+    legend = false,
+    title = &quot;Optimal Design for y = f1 + f2&quot;)
+png(p, &quot;plot5.png&quot;)
+nothing</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">qt.qpa.xcb: could not connect to display
+qt.qpa.plugin: Could not load the Qt platform plugin &quot;xcb&quot; in &quot;&quot; even though it was found.
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: linuxfb, minimal, offscreen, vnc, xcb.
+
+Aborted (core dumped)
+connect: Connection refused
+GKS: can&#39;t connect to GKS socket application
+
+GKS: Open failed in routine OPEN_WS
+GKS: GKS not in proper state. GKS must be either in the state WSOP or WSAC in routine ACTIVATE_WS</code></pre><p><img src="../plot5.png" alt/></p><h3 id="Screening-with-Plackett-Burman-Designs"><a class="docs-heading-anchor" href="#Screening-with-Plackett-Burman-Designs">Screening with Plackett-Burman Designs</a><a id="Screening-with-Plackett-Burman-Designs-1"></a><a class="docs-heading-anchor-permalink" href="#Screening-with-Plackett-Burman-Designs" title="Permalink"></a></h3><h4 id="Generating-Plackett-Burman-Designs"><a class="docs-heading-anchor" href="#Generating-Plackett-Burman-Designs">Generating Plackett-Burman Designs</a><a id="Generating-Plackett-Burman-Designs-1"></a><a class="docs-heading-anchor-permalink" href="#Generating-Plackett-Burman-Designs" title="Permalink"></a></h4><p>A Plackett-Burman design is an orthogonal design matrix for factors <span>$f_1,\dots,f_N$</span>. Factors are encoded by high and low values, which can be mapped to the interval <span>$[-1, 1]$</span>. For designs in this package, the design matrix is a <code>DataFrame</code> from the <a href="https://juliastats.org/GLM.jl/stable/">DataFrame package</a>. For example, let&#39;s create a Plackett-Burman design for 6 factors:</p><pre><code class="language-julia hljs">design = PlackettBurman(6)
+design.matrix</code></pre><div><div style = "float: left;"><span>8×7 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "header"><th class = "rowNumber" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">factor1</th><th style = "text-align: left;">factor2</th><th style = "text-align: left;">factor3</th><th style = "text-align: left;">factor4</th><th style = "text-align: left;">factor5</th><th style = "text-align: left;">factor6</th><th style = "text-align: left;">dummy1</th></tr><tr class = "subheader headerLastRow"><th class = "rowNumber" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th></tr></thead><tbody><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td></tr></tbody></table></div><p>Note that it is not possible to construct exact Plackett-Burman designs for all numbers of factors. In the example above, we needed a seventh extra &quot;dummy&quot; column to construct the design for six factors.</p><p>Using the <code>PlackettBurman</code> constructor enables quick construction of minimal screening designs for scenarios where we ignore interactions. We can access the underlying formula, which is a <code>Term</code> object from the <a href="https://juliastats.org/StatsModels.jl/stable/">StatsModels package</a>:</p><pre><code class="language-julia hljs">println(design.formula)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0 ~ -1 + factor1 + factor2 + factor3 + factor4 + factor5 + factor6 + dummy1</code></pre><p>Notice we ignore interactions and include the dummy factor in the model. Strong main effects attributed to dummy factors may indicate important interactions.</p><p>We can obtain a tuple with the names of dummy factors:</p><pre><code class="language-julia hljs">design.dummy_factors</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(:dummy1,)</code></pre><p>We can also get the main factors tuple:</p><pre><code class="language-julia hljs">design.factors</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(:factor1, :factor2, :factor3, :factor4, :factor5, :factor6)</code></pre><p>You can check other constructors on <a href="https://phrb.github.io/ExperimentalDesign.jl/dev/lib/public/#ExperimentalDesign.PlackettBurman-Tuple{Int64}">the docs</a>.</p><h4 id="Computing-Main-Effects"><a class="docs-heading-anchor" href="#Computing-Main-Effects">Computing Main Effects</a><a id="Computing-Main-Effects-1"></a><a class="docs-heading-anchor-permalink" href="#Computing-Main-Effects" title="Permalink"></a></h4><p>Suppose that the response variable on the experiments specified in our screening design is computed by:</p>$<p>y = 1.2 + (2.3f<em>1) + (-3.4f</em>2) + (7.12f<em>3) + (-0.03f</em>4) + (1.1f<em>5) + (-0.5f</em>6) + \varepsilon $</p><p>The coefficients we want to estimate are:</p><table><tr><th style="text-align: right">Intercept</th><th style="text-align: right">factor1</th><th style="text-align: right">factor2</th><th style="text-align: right">factor3</th><th style="text-align: right">factor4</th><th style="text-align: right">factor5</th><th style="text-align: right">factor6</th></tr><tr><td style="text-align: right">1.2</td><td style="text-align: right">2.3</td><td style="text-align: right">-3.4</td><td style="text-align: right">7.12</td><td style="text-align: right">-0.03</td><td style="text-align: right">1.1</td><td style="text-align: right">-0.5</td></tr></table><p>The corresponding Julia function is:</p><pre><code class="language-julia hljs">function y(x)
+    return (1.2) +
+           (2.3 * x[1]) +
+           (-3.4 * x[2]) +
+           (7.12 * x[3]) +
+           (-0.03 * x[4]) +
+           (1.1 * x[5]) +
+           (-0.5 * x[6]) +
+           (1.1 * randn())
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">y (generic function with 1 method)</code></pre><p>We can compute the response column for our design using the cell below. Recall that the default is to call the response column <code>:response</code>. We are going to set the seeds each time we run <code>y(x)</code>, so we analyse same results. Play with different seeds to observe variability of estimates.</p><pre><code class="language-julia hljs">Random.seed!(192938)
+
+design.matrix[!, :response] = y.(eachrow(design.matrix[:, collect(design.factors)]))
+design.matrix</code></pre><div><div style = "float: left;"><span>8×8 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "header"><th class = "rowNumber" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">factor1</th><th style = "text-align: left;">factor2</th><th style = "text-align: left;">factor3</th><th style = "text-align: left;">factor4</th><th style = "text-align: left;">factor5</th><th style = "text-align: left;">factor6</th><th style = "text-align: left;">dummy1</th><th style = "text-align: left;">response</th></tr><tr class = "subheader headerLastRow"><th class = "rowNumber" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">8.53078</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-11.1296</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">14.0101</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">2.30315</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-7.15356</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-0.972234</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-7.84967</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">9.78249</td></tr></tbody></table></div><p>Now, we use the <code>lm</code> function from the <a href="https://juliastats.org/GLM.jl/stable/">GLM package</a> to fit a linear model using the design&#39;s matrix and formula:</p><pre><code class="language-julia hljs">lm(term(:response) ~ design.formula.rhs, design.matrix)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">StatsModels.TableRegressionModel{LinearModel{GLM.LmResp{Vector{Float64}}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}}}}, Matrix{Float64}}
+
+response ~ 0 + factor1 + factor2 + factor3 + factor4 + factor5 + factor6 + dummy1
+
+Coefficients:
+──────────────────────────────────────────────────────────────────────
+              Coef.  Std. Error      t  Pr(&gt;|t|)  Lower 95%  Upper 95%
+──────────────────────────────────────────────────────────────────────
+factor1   2.66359      0.940183   2.83    0.2160   -9.28257   14.6097
+factor2  -2.80249      0.940183  -2.98    0.2061  -14.7486     9.14367
+factor3   7.71644      0.940183   8.21    0.0772   -4.22971   19.6626
+factor4  -0.0497774    0.940183  -0.05    0.9663  -11.9959    11.8964
+factor5   0.612681     0.940183   0.65    0.6323  -11.3335    12.5588
+factor6  -0.112675     0.940183  -0.12    0.9241  -12.0588    11.8335
+dummy1   -0.437176     0.940183  -0.46    0.7229  -12.3833    11.509
+──────────────────────────────────────────────────────────────────────</code></pre><p>The table below shows the coefficients estimated by the linear model fit using the Plackett-Burman Design. The purpose of a screening design is not to estimate the actual coefficients, but instead to compute factor main effects. Note that standard errors are the same for every factor estimate. This happens because the design is orthogonal.</p><table><tr><th style="text-align: right"></th><th style="text-align: right">Intercept</th><th style="text-align: right">factor1</th><th style="text-align: right">factor2</th><th style="text-align: right">factor3</th><th style="text-align: right">factor4</th><th style="text-align: right">factor5</th><th style="text-align: right">factor6</th><th style="text-align: right">dummy1</th></tr><tr><td style="text-align: right">Original</td><td style="text-align: right">1.2</td><td style="text-align: right">2.3</td><td style="text-align: right">-3.4</td><td style="text-align: right">7.12</td><td style="text-align: right">-0.03</td><td style="text-align: right">1.1</td><td style="text-align: right">-0.5</td><td style="text-align: right"><span>$-$</span></td></tr><tr><td style="text-align: right">Plackett-Burman Main Effects</td><td style="text-align: right"><span>$-$</span></td><td style="text-align: right">2.66359</td><td style="text-align: right">-2.80249</td><td style="text-align: right">7.71644</td><td style="text-align: right">-0.0497774</td><td style="text-align: right">0.612681</td><td style="text-align: right">-0.112675</td><td style="text-align: right">-0.437176</td></tr></table><p>We can use the coefficient magnitudes to infer that factor 3 probably has a strong main effect, and that factor 6 has not. Our dummy column had a relatively small coefficient estimate, so we could attempt to ignore interactions on subsequent experiments.</p><h4 id="Fitting-a-Linear-Model"><a class="docs-heading-anchor" href="#Fitting-a-Linear-Model">Fitting a Linear Model</a><a id="Fitting-a-Linear-Model-1"></a><a class="docs-heading-anchor-permalink" href="#Fitting-a-Linear-Model" title="Permalink"></a></h4><p>We can also try to fit a linear model on our design data in order to estimate coefficients. We would need to drop the dummy column and add the intercept term:</p><pre><code class="language-julia hljs">lm(term(:response) ~ sum(term.(design.factors)), design.matrix)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">StatsModels.TableRegressionModel{LinearModel{GLM.LmResp{Vector{Float64}}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}}}}, Matrix{Float64}}
+
+response ~ 1 + factor1 + factor2 + factor3 + factor4 + factor5 + factor6
+
+Coefficients:
+──────────────────────────────────────────────────────────────────────────
+                  Coef.  Std. Error      t  Pr(&gt;|t|)  Lower 95%  Upper 95%
+──────────────────────────────────────────────────────────────────────────
+(Intercept)   0.940183     0.437176   2.15    0.2771   -4.61466    6.49503
+factor1       2.66359      0.437176   6.09    0.1036   -2.89126    8.21843
+factor2      -2.80249      0.437176  -6.41    0.0985   -8.35733    2.75236
+factor3       7.71644      0.437176  17.65    0.0360    2.1616    13.2713
+factor4      -0.0497774    0.437176  -0.11    0.9278   -5.60462    5.50507
+factor5       0.612681     0.437176   1.40    0.3946   -4.94217    6.16753
+factor6      -0.112675     0.437176  -0.26    0.8394   -5.66752    5.44217
+──────────────────────────────────────────────────────────────────────────</code></pre><p>Our table so far looks like this:</p><table><tr><th style="text-align: right"></th><th style="text-align: right">Intercept</th><th style="text-align: right">factor1</th><th style="text-align: right">factor2</th><th style="text-align: right">factor3</th><th style="text-align: right">factor4</th><th style="text-align: right">factor5</th><th style="text-align: right">factor6</th><th style="text-align: right">dummy1</th></tr><tr><td style="text-align: right">Original</td><td style="text-align: right">1.2</td><td style="text-align: right">2.3</td><td style="text-align: right">-3.4</td><td style="text-align: right">7.12</td><td style="text-align: right">-0.03</td><td style="text-align: right">1.1</td><td style="text-align: right">-0.5</td><td style="text-align: right"><span>$-$</span></td></tr><tr><td style="text-align: right">Plackett-Burman Main Effects</td><td style="text-align: right"><span>$-$</span></td><td style="text-align: right">2.66359</td><td style="text-align: right">-2.80249</td><td style="text-align: right">7.71644</td><td style="text-align: right">-0.0497774</td><td style="text-align: right">0.612681</td><td style="text-align: right">-0.112675</td><td style="text-align: right">-0.437176</td></tr><tr><td style="text-align: right">Plackett-Burman Estimate</td><td style="text-align: right">0.940183</td><td style="text-align: right">2.66359</td><td style="text-align: right">-2.80249</td><td style="text-align: right">7.71644</td><td style="text-align: right">-0.0497774</td><td style="text-align: right">0.612681</td><td style="text-align: right">-0.112675</td><td style="text-align: right"><span>$-$</span></td></tr></table><p>Notice that, since the standard errors are the same for all factors, factors with stronger main effects are better estimated. Notice that, despite the &quot;good&quot; coefficient estimates, the confidence intervals are really large.</p><p>This is a biased comparison where the screening design &quot;works&quot; for coefficient estimation as well, but we would rather use fractional factorial or optimal designs to estimate the coefficients of factors with strong effects. Screening should be used to compute main effects and identifying which factors to test next.</p><h4 id="Generating-Random-Designs"><a class="docs-heading-anchor" href="#Generating-Random-Designs">Generating Random Designs</a><a id="Generating-Random-Designs-1"></a><a class="docs-heading-anchor-permalink" href="#Generating-Random-Designs" title="Permalink"></a></h4><p>We can also compare the coefficients produced by the same linear model fit, but using a random design. For more information, check <a href="https://phrb.github.io/ExperimentalDesign.jl/dev/lib/public/#ExperimentalDesign.RandomDesign-Tuple{NamedTuple}">the docs</a>.</p><pre><code class="language-julia hljs">Random.seed!(8418172)
+
+design_distribution = DesignDistribution(DiscreteNonParametric([-1, 1], [0.5, 0.5]), 6)
+random_design = rand(design_distribution, 8)
+
+random_design.matrix[!, :response] = y.(eachrow(random_design.matrix[:, :]))
+random_design.matrix</code></pre><div><div style = "float: left;"><span>8×7 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "header"><th class = "rowNumber" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">factor1</th><th style = "text-align: left;">factor2</th><th style = "text-align: left;">factor3</th><th style = "text-align: left;">factor4</th><th style = "text-align: left;">factor5</th><th style = "text-align: left;">factor6</th><th style = "text-align: left;">response</th></tr><tr class = "subheader headerLastRow"><th class = "rowNumber" style = "font-weight: bold; text-align: right;"></th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Int64" style = "text-align: left;">Int64</th><th title = "Float64" style = "text-align: left;">Float64</th></tr></thead><tbody><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-3.85946</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">11.0065</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">3</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">8.77547</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">4</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">14.2217</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">5</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">16.0499</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">6</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1.94982</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">7</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">7.37002</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">8</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">-1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">1</td><td style = "text-align: right;">-4.72545</td></tr></tbody></table></div><pre><code class="language-julia hljs">lm(term(:response) ~ random_design.formula.rhs, random_design.matrix)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">StatsModels.TableRegressionModel{LinearModel{GLM.LmResp{Vector{Float64}}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}}}}, Matrix{Float64}}
+
+response ~ 1 + factor1 + factor2 + factor3 + factor4 + factor5 + factor6
+
+Coefficients:
+─────────────────────────────────────────────────────────────────────────
+                 Coef.  Std. Error      t  Pr(&gt;|t|)  Lower 95%  Upper 95%
+─────────────────────────────────────────────────────────────────────────
+(Intercept)   3.60184     2.33068    1.55    0.3656  -26.0123    33.2159
+factor1       1.9406      1.16534    1.67    0.3443  -12.8665    16.7476
+factor2      -0.926522    2.72165   -0.34    0.7911  -35.5083    33.6553
+factor3       7.53296     0.92962    8.10    0.0782   -4.27898   19.3449
+factor4       0.91412     0.702726   1.30    0.4172   -8.01487    9.84311
+factor5       0.55278     0.92962    0.59    0.6585  -11.2592    12.3647
+factor6       0.581079    1.68508    0.34    0.7886  -20.8299    21.992
+─────────────────────────────────────────────────────────────────────────</code></pre><p>Now, our table looks like this:</p><table><tr><th style="text-align: right"></th><th style="text-align: right">Intercept</th><th style="text-align: right">factor1</th><th style="text-align: right">factor2</th><th style="text-align: right">factor3</th><th style="text-align: right">factor4</th><th style="text-align: right">factor5</th><th style="text-align: right">factor6</th><th style="text-align: right">dummy1</th></tr><tr><td style="text-align: right">Original</td><td style="text-align: right">1.2</td><td style="text-align: right">2.3</td><td style="text-align: right">-3.4</td><td style="text-align: right">7.12</td><td style="text-align: right">-0.03</td><td style="text-align: right">1.1</td><td style="text-align: right">-0.5</td><td style="text-align: right"><span>$-$</span></td></tr><tr><td style="text-align: right">Plackett-Burman Main Effects</td><td style="text-align: right"><span>$-$</span></td><td style="text-align: right">2.66359</td><td style="text-align: right">-2.80249</td><td style="text-align: right">7.71644</td><td style="text-align: right">-0.0497774</td><td style="text-align: right">0.612681</td><td style="text-align: right">-0.112675</td><td style="text-align: right">-0.437176</td></tr><tr><td style="text-align: right">Plackett-Burman Estimate</td><td style="text-align: right">0.940183</td><td style="text-align: right">2.66359</td><td style="text-align: right">-2.80249</td><td style="text-align: right">7.71644</td><td style="text-align: right">-0.0497774</td><td style="text-align: right">0.612681</td><td style="text-align: right">-0.112675</td><td style="text-align: right"><span>$-$</span></td></tr><tr><td style="text-align: right">Single Random Design Estimate</td><td style="text-align: right">0.761531</td><td style="text-align: right">1.67467</td><td style="text-align: right">-3.05027</td><td style="text-align: right">7.72484</td><td style="text-align: right">0.141204</td><td style="text-align: right">1.71071</td><td style="text-align: right">-0.558869</td><td style="text-align: right"><span>$-$</span></td></tr></table><p>The estimates produced using random designs will have larger confidence intervals, and therefore increased variability. The Plackett-Burman design is fixed, but can be randomised. The variability of main effects estimates using screening designs will depend on measurement or model error.</p><h4 id="Generating-Full-Factorial-Designs"><a class="docs-heading-anchor" href="#Generating-Full-Factorial-Designs">Generating Full Factorial Designs</a><a id="Generating-Full-Factorial-Designs-1"></a><a class="docs-heading-anchor-permalink" href="#Generating-Full-Factorial-Designs" title="Permalink"></a></h4><p>In this toy example, it is possible to generate all the possible combinations of six binary factors and compute the response. Although it costs 64 experiments, the linear model fit for the full factorial design should produce the best coefficient estimates.</p><p>The simplest full factorial design constructor receives an array of possible factor levels. For more, check <a href="https://phrb.github.io/ExperimentalDesign.jl/dev/lib/public/#ExperimentalDesign.FullFactorial-Tuple{NamedTuple,StatsModels.FormulaTerm}">the docs</a>.</p><pre><code class="language-julia hljs">Random.seed!(2989476)
+
+factorial_design = FullFactorial(fill([-1, 1], 6))
+factorial_design.matrix[!, :response] = y.(eachrow(factorial_design.matrix[:, :]))
+
+lm(term(:response) ~ factorial_design.formula.rhs, factorial_design.matrix)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">StatsModels.TableRegressionModel{LinearModel{GLM.LmResp{Vector{Float64}}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}}}}, Matrix{Float64}}
+
+response ~ 1 + factor1 + factor2 + factor3 + factor4 + factor5 + factor6
+
+Coefficients:
+───────────────────────────────────────────────────────────────────────────
+                 Coef.  Std. Error       t  Pr(&gt;|t|)  Lower 95%   Upper 95%
+───────────────────────────────────────────────────────────────────────────
+(Intercept)   1.13095     0.123021    9.19    &lt;1e-12   0.88461    1.3773
+factor1       2.23668     0.123021   18.18    &lt;1e-24   1.99034    2.48303
+factor2      -3.4775      0.123021  -28.27    &lt;1e-34  -3.72384   -3.23115
+factor3       6.95531     0.123021   56.54    &lt;1e-51   6.70897    7.20166
+factor4      -0.160546    0.123021   -1.31    0.1971  -0.406891   0.0857987
+factor5       0.975471    0.123021    7.93    &lt;1e-10   0.729127   1.22182
+factor6      -0.357748    0.123021   -2.91    0.0052  -0.604093  -0.111403
+───────────────────────────────────────────────────────────────────────────</code></pre><p>The confidence intervals for this fit are much smaller. Since we have all information on all factors and this is a balanced design, the standard error is the same for all estimates. Here&#39;s the complete table:</p><table><tr><th style="text-align: right"></th><th style="text-align: right">Intercept</th><th style="text-align: right">factor1</th><th style="text-align: right">factor2</th><th style="text-align: right">factor3</th><th style="text-align: right">factor4</th><th style="text-align: right">factor5</th><th style="text-align: right">factor6</th><th style="text-align: right">dummy1</th></tr><tr><td style="text-align: right">Original</td><td style="text-align: right">1.2</td><td style="text-align: right">2.3</td><td style="text-align: right">-3.4</td><td style="text-align: right">7.12</td><td style="text-align: right">-0.03</td><td style="text-align: right">1.1</td><td style="text-align: right">-0.5</td><td style="text-align: right"><span>$-$</span></td></tr><tr><td style="text-align: right">Plackett-Burman Main Effects</td><td style="text-align: right"><span>$-$</span></td><td style="text-align: right">2.66359</td><td style="text-align: right">-2.80249</td><td style="text-align: right">7.71644</td><td style="text-align: right">-0.0497774</td><td style="text-align: right">0.612681</td><td style="text-align: right">-0.112675</td><td style="text-align: right">-0.437176</td></tr><tr><td style="text-align: right">Plackett-Burman Estimate</td><td style="text-align: right">0.940183</td><td style="text-align: right">2.66359</td><td style="text-align: right">-2.80249</td><td style="text-align: right">7.71644</td><td style="text-align: right">-0.0497774</td><td style="text-align: right">0.612681</td><td style="text-align: right">-0.112675</td><td style="text-align: right"><span>$-$</span></td></tr><tr><td style="text-align: right">Single Random Design Estimate</td><td style="text-align: right">0.600392</td><td style="text-align: right">2.2371</td><td style="text-align: right">-2.56857</td><td style="text-align: right">8.05743</td><td style="text-align: right">0.140622</td><td style="text-align: right">0.907918</td><td style="text-align: right">-0.600354</td><td style="text-align: right"><span>$-$</span></td></tr><tr><td style="text-align: right">Full Factorial Estimate</td><td style="text-align: right">1.13095</td><td style="text-align: right">2.23668</td><td style="text-align: right">-3.4775</td><td style="text-align: right">6.95531</td><td style="text-align: right">-0.160546</td><td style="text-align: right">0.975471</td><td style="text-align: right">-0.357748</td><td style="text-align: right"><span>$-$</span></td></tr></table><p>Full factorial designs may be too expensive in actual applications. Fractional factorial designs or optimal designs can be used to decrease costs while still providing good estimates. Screening designs are extremely cheap, and can help determine which factors can potentially be dropped on more expensive and precise designs.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><a class="docs-footer-nextpage" href="../public/">Public »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Thursday 20 October 2022 22:36">Thursday 20 October 2022</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
