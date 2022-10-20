@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6.2'
+          - '1.6.7'
           - '1' # automatically expands to the latest stable 1.x release of Julia
           - 'nightly'
         os:
@@ -52,7 +52,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
         with:
-          version: '1.6.2'
+          version: '1.6.7'
       - uses: julia-actions/julia-buildpkg@v1
       - run: |
           julia --project=docs -e '
