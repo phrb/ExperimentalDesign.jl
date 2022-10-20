@@ -3,10 +3,11 @@ using LinearAlgebra, StatsModels, ExperimentalDesign, Distributions, DataFrames
 """
 $(TYPEDSIGNATURES)
 
-```jldoctest
-julia> 1 + 1
-2
-```
+Criterion of D-optimality, which seeks to minimize ``|(X^T · X) − I*tol| / N^{1/b}``,
+or equivalently maximize the determinant of the information matrix ``X^T · X``
+of the design. This criterion results in maximizing the differential
+Shannon information content of the parameter estimates.
+
 """
 function d_criterion(model_matrix;
                      tolerance = 1e-9)
