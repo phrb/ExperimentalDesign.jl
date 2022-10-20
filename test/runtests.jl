@@ -6,7 +6,7 @@ using Test,
     StatsModels
 
 # tests = ["kl_exchange.jl", "doctests.jl"]
-tests = ["kl_exchange.jl"]
+tests = ["kl_exchange.jl", "paley.jl"]
 
 @testset "ExperimentalDesign" begin
     for test in tests
