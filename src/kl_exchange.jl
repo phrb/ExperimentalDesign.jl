@@ -16,11 +16,17 @@ function d_criterion(model_matrix;
         (1 / size(model_matrix, 2))
 end
 
-
+# Yier W, Alexandr Klimchik et al, OPTIMALITY CRITERIA FOR MEASUREMENT
+# POSES SELECTION IN  CALIBRATION OF ROBOT STIFFNESS PARAMETERS, 2012
+#
 """
 $(TYPEDSIGNATURES)
 
-Criterion of A-optimality.
+Criterion of A-optimality  which seeks minimum of ``trace((X^T · X)^{-1})``.
+This criterion results in minimizing the average variance of the
+estimates of the regression coefficients.
+
+Criterion metric is ``\\frac{p}{trace((X^T · X)^{-1}) · N}``.
 
 """
 function a_criterion(model_matrix;
@@ -35,8 +41,9 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Criterion of T-optimality. Experimental.
+Criterion of T-optimality. This criterion maximize ``trace(X^T · X)``.
 
+Minimization metric is ``\\frac{trace(X^T · X)}{N · p}``.
 """
 function t_criterion(model_matrix;
                      tolerance = 0)
@@ -47,7 +54,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Criterion of G-optimality. Experimental.
+Criterion of G-optimality which seeks minimize the maximum
+entry in the diagonal of ``X·(X^T · X)^{-1}·X^T``.
+This criterion results in minimizing
+the maximum variance of the predicted values.
+
+Minimization metric is ``\\frac{N}{\\max diag(H)}``
+where ``H = X·(X^T · X)^{-1}·X^T``.
 
 """
 function g_criterion(model_matrix;
@@ -63,8 +76,10 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Criterion of E-optimality. Experimental.
+Criterion of E-optimality maximizes the minimum eigenvalue
+of the information matrix (``X^T · X``).
 
+Minimization metric is ``\\frac{\\min λ(X^T · X)}{N}``
 """
 function e_criterion(model_matrix;
                      tolerance = 0)
@@ -72,7 +87,11 @@ function e_criterion(model_matrix;
     mλ = minimum(eigvals(M)) / size(model_matrix, 1)
 end
 
-
+#=
+This criterion should be changed or removed. Rototability can be assesed
+if clasterization of distanses performed, then SD can be calculated inside
+clasters. Clustering.jl can be used for it.
+=#
 """
 $(TYPEDSIGNATURES)
 
