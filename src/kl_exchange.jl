@@ -16,6 +16,78 @@ function d_criterion(model_matrix;
         (1 / size(model_matrix, 2))
 end
 
+
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of A-optimality.
+
+"""
+function a_criterion(model_matrix;
+                     tolerance = 1e-9)
+    M = model_matrix' * model_matrix + (I * tolerance)
+    C = cholesky(M, check = false)
+    if !issuccess(C) return 0 end
+    M⁻¹ = inv(C)
+    size(model_matrix, 2)/tr(M⁻¹)/size(model_matrix, 1)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of T-optimality. Experimental.
+
+"""
+function t_criterion(model_matrix;
+                     tolerance = 0)
+    M = model_matrix' * model_matrix + (I * tolerance)
+    tr(M)/size(model_matrix, 1)/size(model_matrix, 2)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of G-optimality. Experimental.
+
+"""
+function g_criterion(model_matrix;
+                     tolerance = 1e-9)
+    M = model_matrix' * model_matrix + (I * tolerance)
+    C = cholesky(M, check = false)
+    if !issuccess(C) return 0 end
+    M⁻¹ = inv(C)
+    H   = model_matrix * M⁻¹ * model_matrix'
+    size(model_matrix, 2)/maximum(diag(H))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of E-optimality. Experimental.
+
+"""
+function e_criterion(model_matrix;
+                     tolerance = 0)
+    M  = model_matrix' * model_matrix + (I * tolerance)
+    mλ = minimum(eigvals(M)) / size(model_matrix, 1)
+end
+
+
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of rotation distance optimality. Experimental.
+
+"""
+function rd_criterion(model_matrix;
+                     tolerance = 0)
+    dv = Vector{Float64}(undef, size(model_matrix, 1))
+    for i = 1:size(model_matrix, 1)
+        dv[i] = sqrt(sum(x-> x*x, view(model_matrix, i, :)))
+    end
+    1/exp(std(dv))
+end
+
 """
 $(TYPEDSIGNATURES)
 
