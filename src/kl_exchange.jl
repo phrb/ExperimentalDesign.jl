@@ -16,6 +16,97 @@ function d_criterion(model_matrix;
         (1 / size(model_matrix, 2))
 end
 
+# Yier W, Alexandr Klimchik et al, OPTIMALITY CRITERIA FOR MEASUREMENT
+# POSES SELECTION IN  CALIBRATION OF ROBOT STIFFNESS PARAMETERS, 2012
+#
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of A-optimality  which seeks minimum of ``trace((X^T · X)^{-1})``.
+This criterion results in minimizing the average variance of the
+estimates of the regression coefficients.
+
+Criterion metric is ``\\frac{p}{trace((X^T · X)^{-1}) · N}``.
+
+"""
+function a_criterion(model_matrix;
+                     tolerance = 1e-9)
+    M = model_matrix' * model_matrix + (I * tolerance)
+    C = cholesky(M, check = false)
+    if !issuccess(C) return 0 end
+    M⁻¹ = inv(C)
+    size(model_matrix, 2)/tr(M⁻¹)/size(model_matrix, 1)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of T-optimality. This criterion maximize ``trace(X^T · X)``.
+
+Minimization metric is ``\\frac{trace(X^T · X)}{N · p}``.
+"""
+function t_criterion(model_matrix;
+                     tolerance = 0)
+    M = model_matrix' * model_matrix + (I * tolerance)
+    tr(M)/size(model_matrix, 1)/size(model_matrix, 2)
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of G-optimality which seeks minimize the maximum
+entry in the diagonal of ``X·(X^T · X)^{-1}·X^T``.
+This criterion results in minimizing
+the maximum variance of the predicted values.
+
+Minimization metric is ``\\frac{N}{\\max diag(H)}``
+where ``H = X·(X^T · X)^{-1}·X^T``.
+
+"""
+function g_criterion(model_matrix;
+                     tolerance = 1e-9)
+    M = model_matrix' * model_matrix + (I * tolerance)
+    C = cholesky(M, check = false)
+    if !issuccess(C) return 0 end
+    M⁻¹ = inv(C)
+    H   = model_matrix * M⁻¹ * model_matrix'
+    size(model_matrix, 2)/maximum(diag(H))
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of E-optimality maximizes the minimum eigenvalue
+of the information matrix (``X^T · X``).
+
+Minimization metric is ``\\frac{\\min λ(X^T · X)}{N}``
+"""
+function e_criterion(model_matrix;
+                     tolerance = 0)
+    M  = model_matrix' * model_matrix + (I * tolerance)
+    mλ = minimum(eigvals(M)) / size(model_matrix, 1)
+end
+
+#=
+This criterion should be changed or removed. Rototability can be assesed
+if clasterization of distanses performed, then SD can be calculated inside
+clasters. Clustering.jl can be used for it.
+=#
+"""
+$(TYPEDSIGNATURES)
+
+Criterion of rotation distance optimality. Experimental.
+
+"""
+function rd_criterion(model_matrix;
+                     tolerance = 0)
+    dv = Vector{Float64}(undef, size(model_matrix, 1))
+    for i = 1:size(model_matrix, 1)
+        dv[i] = sqrt(sum(x-> x*x, view(model_matrix, i, :)))
+    end
+    1/exp(std(dv))
+end
+
 """
 $(TYPEDSIGNATURES)
 
